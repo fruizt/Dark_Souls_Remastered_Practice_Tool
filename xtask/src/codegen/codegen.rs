@@ -377,17 +377,9 @@ pub fn codegen_base_addresses(
 ) {
     let mut processed_versions: HashSet<Version> = HashSet::new();
 
-    println!(" outside the filter");
-
     let mut version_data = patches_paths
-        .map(|p| {
-            println!("Checking path: {:?}", p);
-            p
-        })
         .filter(|p| p.exists())
         .filter_map(|exe| {
-            println!(" In the filter");
-
             let file_map = FileMap::open(&exe).unwrap();
             let pe_file = PeFile::from_bytes(&file_map).unwrap();
 

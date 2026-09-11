@@ -1,0 +1,4 @@
+[alias]
+# Regenerate lib/libdsr/src/codegen/base_addresses.rs by AOB-scanning the game
+# executables found under DSR_INSTALLS_DIR. See .env.example.
+xtask = "run --package xtask --"

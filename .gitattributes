@@ -1,0 +1,14 @@
+# Normalise line endings so regenerating base_addresses.rs on Windows does not
+# produce a diff that is nothing but CRLF churn.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.gif binary
+*.mp4 binary
+*.sl2 binary
+*.dll binary
+*.exe binary
+
+# Generated — collapse it in PR diffs and keep it out of language stats.
+lib/libdsr/src/codegen/base_addresses.rs linguist-generated=true

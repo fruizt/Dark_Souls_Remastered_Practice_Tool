@@ -27,6 +27,3 @@ imgui.workspace = true
 once_cell.workspace = true
 windows.workspace = true
 practice-tool-core.workspace = true
-
-[patch.'crates-io']
-imgui = { git = "https://github.com/imgui-rs/imgui-rs", rev = "cb8beeb" }

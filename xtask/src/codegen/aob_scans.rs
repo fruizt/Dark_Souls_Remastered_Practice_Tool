@@ -1,19 +1,34 @@
-use std::{
-    env,
-    path::{Path, PathBuf},
-};
+use std::env;
+use std::path::{Path, PathBuf};
+
+use anyhow::{bail, Context, Result};
 
 // use practice_tool_tasks::codegen::{self, aob_direct, aob_indirect, aob_indirect_twice};
 use super::codegen::{self, aob_indirect_twice};
 
-fn patches_paths() -> impl Iterator<Item = PathBuf> {
-    // let string_path = env::var("DSR_PATCHES_PATH").unwrap_or_else(|_| panic!());
-    let base_path = PathBuf::from(r"D:\SteamLibrary\steamapps\common");
-    base_path
+/// Every `DarkSoulsRemastered.exe` found one level below `DSR_INSTALLS_DIR`.
+///
+/// The variable points at a directory that *contains* game installs (a Steam
+/// library's `steamapps/common`, say), not at an install itself, so that several
+/// game versions sitting side by side can be scanned in one run.
+fn patches_paths() -> Result<impl Iterator<Item = PathBuf>> {
+    let base_path = env::var("DSR_INSTALLS_DIR").map(PathBuf::from).context(
+        "DSR_INSTALLS_DIR is not set. Copy .env.example to .env and point it at the directory \
+         containing your Dark Souls Remastered install.",
+    )?;
+
+    if !base_path.is_dir() {
+        bail!(
+            "DSR_INSTALLS_DIR does not point at a directory: {}",
+            base_path.display()
+        );
+    }
+
+    Ok(base_path
         .read_dir()
-        .expect("Couldn't scan patches directory")
-        .map(Result::unwrap)
-        .map(|dir| dir.path().join("DarkSoulsRemastered.exe")) // This is wack, at least in my case
+        .with_context(|| format!("Couldn't scan patches directory {}", base_path.display()))?
+        .filter_map(Result::ok)
+        .map(|dir| dir.path().join("DarkSoulsRemastered.exe")))
 }
 
 fn base_addresses_rs_path() -> PathBuf {
@@ -29,7 +44,7 @@ fn base_addresses_rs_path() -> PathBuf {
         .join("base_addresses.rs")
 }
 
-pub fn get_base_addresses() {
+pub fn get_base_addresses() -> Result<()> {
     let aobs = &[
         aob_indirect_twice("BaseA", &["48 89 05 xx xx xx xx 8D 42"], 3, 7, true),
         aob_indirect_twice(
@@ -70,6 +85,8 @@ pub fn get_base_addresses() {
     ];
 
     let base_address_path = base_addresses_rs_path();
-    let patches_path = patches_paths();
-    codegen::codegen_base_addresses(base_address_path, patches_path, aobs)
+    let patches_path = patches_paths()?;
+    codegen::codegen_base_addresses(base_address_path, patches_path, aobs);
+
+    Ok(())
 }

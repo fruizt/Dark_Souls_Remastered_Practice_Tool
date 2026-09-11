@@ -32,3 +32,8 @@ features = [
     "Win32_System_SystemInformation",
 ]
 
+# hudhook 0.7 expects imgui features that are not in a published imgui release,
+# so the whole workspace is pinned to this revision. Cargo only honours [patch]
+# in the workspace root, never in a member manifest.
+[patch.'crates-io']
+imgui = { git = "https://github.com/imgui-rs/imgui-rs", rev = "cb8beeb" }
