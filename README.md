@@ -12,9 +12,13 @@ position live — the things you actually need when you are grinding a route or 
 > still stubbed out — see [Status & roadmap](#status--roadmap) for an honest breakdown of what
 > works, what is partial, and what is not there yet.
 
-<!-- TODO(screenshots): drop a GIF of the overlay in action here — it sells the project faster than
-     any paragraph. Suggested: open the menu, toggle No Death, take a hit, then warp to a saved
-     position. Put assets in docs/ and reference them as ![Overlay](docs/overlay.gif). -->
+![The overlay open in-game, showing the full widget list](docs/overlay.png)
+
+<p align="center">
+  <img src="docs/demo.gif" alt="Opening the overlay and granting souls live, without pausing the game">
+  <br>
+  <em>Opening the overlay and adding 10,000 souls — the game keeps running underneath.</em>
+</p>
 
 ---
 
