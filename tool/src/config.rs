@@ -8,9 +8,11 @@ use tracing_subscriber::filter::LevelFilter;
 
 use crate::widgets::character_stats::character_stats_edit;
 use crate::widgets::cycle_speed::cycle_speed;
+use crate::widgets::event_flags::event_flags;
 use crate::widgets::flag::flag_widget;
 use crate::widgets::group::group;
 use crate::widgets::label::label_widget;
+use crate::widgets::last_bonfire::last_bonfire;
 use crate::widgets::nudge_pos::nudge_position;
 use crate::widgets::open_menu::{open_menu, OpenMenuKind};
 use crate::widgets::position::save_position;
@@ -215,6 +217,14 @@ enum CfgCommand {
         #[serde(rename = "quitout")]
         hotkey: PlaceholderOption<Key>,
     },
+    EventFlags {
+        #[serde(rename = "event_flags")]
+        enabled: bool,
+    },
+    LastBonfire {
+        #[serde(rename = "last_bonfire")]
+        enabled: bool,
+    },
     // Target {
     //     #[serde(rename = "target")]
     //     hotkey: PlaceholderOption<Key>,
@@ -343,6 +353,8 @@ impl CfgCommand {
             },
             CfgCommand::Souls { amount, hotkey } => souls(amount, chains.souls.clone(), hotkey),
             CfgCommand::Quitout { hotkey } => quitout(chains.quitout.clone(), hotkey.into_option()),
+            CfgCommand::EventFlags { .. } => event_flags(chains.event_flags.clone()),
+            CfgCommand::LastBonfire { .. } => last_bonfire(chains.last_bonfire.clone()),
             // CfgCommand::OpenMenu { hotkey, kind } => {
             //     open_menu(kind, chains.travel_ptr, chains.attune_ptr, hotkey)
             // }

@@ -66,6 +66,8 @@ Everything in this table is implemented and works in-game.
 | **All No Damage** | Take no damage at all. |
 | **Quitout** | Quit to the main menu on a hotkey, without the pause screen. |
 | **Deathcam** | Free the camera from the player. |
+| **Event flags** | Read and flip story flags by ID — mark a boss dead, a door open, a covenant joined. |
+| **Last bonfire** | Set the bonfire the next load sends you to. With Quitout, that is a warp. |
 | **World debug flags** | Toggle no-dead, no-hit, no-attack, no-move, AI disable and the consumption flags for every character in the world, or for the player alone. |
 | **Render flags** | Turn drawing of the map, objects, characters, SFX and cutscenes on and off. |
 | **Infinite Stamina** | Stamina never drains. |
@@ -182,6 +184,8 @@ widget is click-only.
 | `cycle_speed` | `{ cycle_speed = [0.5, 1.0, 2.0], hotkey = "8" }` | Cycles in ascending order, wrapping around. |
 | `souls` | `{ souls = 10000, hotkey = "9" }` | Adds to the current total rather than replacing it. |
 | `quitout` | `{ quitout = "p" }` | Quit to the main menu. Writes the game's own menu-kick field, so the save is written normally. |
+| `event_flags` | `{ event_flags = true }` | Panel to read, set and clear a story flag by its event ID. |
+| `last_bonfire` | `{ last_bonfire = true }` | Panel to read and set the bonfire the next load spawns you at. |
 | `character_stats` | `{ character_stats = true }` | Opens the stat editor panel. Can take a hotkey instead of `true`. |
 | `savefile_manager` | `{ savefile_manager = "ctrl+o" }` | Auto-discovers your save directory under `Documents\NBGI\DARK SOULS REMASTERED`. |
 | `label` | `{ label = "Some heading" }` | Static text. An empty string is a spacer. |
@@ -262,9 +266,9 @@ Scaffolding exists for these — they are commented out in `tool/src/config.rs` 
   mechanics with no Dark Souls equivalent and will not be added.)
 - **Debug draw flags** — hurtboxes, collision mesh, debug spheres, IK foot rays. Remastered does
   not appear to expose the render path DS3 uses for these.
-- **Event flags** — read and set story flags to jump the route to a given state.
 - **Bonfire warp** and **item spawner** — both need the tool to call game functions, which is the
-  riskiest class of change here; the base addresses are scanned but nothing calls them yet.
+  riskiest class of change here; the base addresses are scanned but nothing calls them yet. Setting
+  the last bonfire and quitting out covers most of what a warp is for in the meantime.
 - **Multi-version support** — see version detection above.
 
 ---

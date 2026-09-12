@@ -4,6 +4,10 @@ commands = [
   { cycle_speed = [0.5, 1.0, 2.0, 5.0], hotkey = "8" },
   { souls = 10000, hotkey = "9" },
   { quitout = "p" },
+  { group = "Route state", commands = [
+    { last_bonfire = true },
+    { event_flags = true },
+  ]},
   { group = "Positions", commands = [
     { nudge = 1.0, nudge_up = "[", nudge_down = "]" },
     { position = "h", save = "rshift+h" },

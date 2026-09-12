@@ -4,6 +4,7 @@ use log::debug;
 use windows::Win32::System::LibraryLoader::GetModuleHandleA;
 
 use crate::codegen::base_addresses::Version;
+use crate::event_flags::EventFlags;
 use crate::memedit::{Bitflag, *};
 use crate::prelude::base_addresses::BaseAddresses;
 use crate::version::VERSION;
@@ -60,6 +61,10 @@ pub struct PointerChains {
     pub position: (PointerChain<f32>, PointerChain<[f32; 3]>),
     pub deathcam: Bitflag<u8>,
     pub quitout: PointerChain<i32>,
+    pub event_flags: EventFlags,
+    /// The bonfire you last rested at. Set it, quit out, and reload to warp
+    /// there.
+    pub last_bonfire: PointerChain<u32>,
 
     // The rest of the ChrDbg block. Every entry is a whole-byte boolean, so each of
     // these is masked with `0b1` rather than a real bit.
@@ -88,8 +93,16 @@ pub struct PointerChains {
 impl From<BaseAddresses> for PointerChains {
     fn from(value: BaseAddresses) -> Self {
         debug!("{:#?}", value);
-        let BaseAddresses { game_data_man, world_chr_man, menu_man, chr_dbg, group_mask, .. } =
-            value;
+        let BaseAddresses {
+            game_data_man,
+            world_chr_man,
+            menu_man,
+            chr_dbg,
+            group_mask,
+            event_flag_man,
+            chr_class_warp,
+            ..
+        } = value;
 
         // Indices into the ChrDbg flag block. Each entry is a whole-byte boolean, so
         // the masks below are 0b1 rather than real bitmasks.
@@ -120,6 +133,9 @@ impl From<BaseAddresses> for PointerChains {
             deathcam: bitflag!(0b1; world_chr_man, 0x70),
             // Menu kick. Writing 2 here is what quits out to the main menu.
             quitout: pointer_chain!(menu_man, 0x24c),
+            event_flags: EventFlags::new(event_flag_man),
+            // 0xB24 on 1.01.x; the warp block gained 0x10 in 1.01.2.
+            last_bonfire: pointer_chain!(chr_class_warp, 0xb34),
 
             player_no_dead: bitflag!(0b1; chr_dbg + 0x0),
             player_exterminate: bitflag!(0b1; chr_dbg + 0x1),

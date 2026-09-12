@@ -1,8 +1,10 @@
 pub(crate) mod character_stats;
 pub(crate) mod cycle_speed;
+pub(crate) mod event_flags;
 pub(crate) mod flag;
 pub(crate) mod group;
 pub(crate) mod label;
+pub(crate) mod last_bonfire;
 pub(crate) mod nudge_pos;
 pub(crate) mod open_menu;
 pub(crate) mod position;
