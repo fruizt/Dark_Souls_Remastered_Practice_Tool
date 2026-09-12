@@ -3,21 +3,41 @@
 // **********************************
 #[derive(Debug)]
 pub struct BaseAddresses {
-    pub base_a: usize,
+    pub game_data_man: usize,
     pub world_chr_man: usize,
-    pub character_flags: usize,
-    pub base_menu: usize,
-    pub world_chr_debug: usize,
+    pub menu_man: usize,
+    pub chr_class_warp: usize,
+    pub event_flag_man: usize,
+    pub cam_man: usize,
+    pub chr_follow_cam: usize,
+    pub graphics_data: usize,
+    pub ai_timer: usize,
+    pub chr_dbg: usize,
+    pub group_mask: usize,
+    pub get_event_flag_fn: usize,
+    pub set_event_flag_fn: usize,
+    pub bonfire_warp_fn: usize,
+    pub item_get_fn: usize,
 }
 
 impl BaseAddresses {
     pub fn with_module_base_addr(self, base: usize) -> BaseAddresses {
         BaseAddresses {
-            base_a: self.base_a + base,
+            game_data_man: self.game_data_man + base,
             world_chr_man: self.world_chr_man + base,
-            character_flags: self.character_flags + base,
-            base_menu: self.base_menu + base,
-            world_chr_debug: self.world_chr_debug + base,
+            menu_man: self.menu_man + base,
+            chr_class_warp: self.chr_class_warp + base,
+            event_flag_man: self.event_flag_man + base,
+            cam_man: self.cam_man + base,
+            chr_follow_cam: self.chr_follow_cam + base,
+            graphics_data: self.graphics_data + base,
+            ai_timer: self.ai_timer + base,
+            chr_dbg: self.chr_dbg + base,
+            group_mask: self.group_mask + base,
+            get_event_flag_fn: self.get_event_flag_fn + base,
+            set_event_flag_fn: self.set_event_flag_fn + base,
+            bonfire_warp_fn: self.bonfire_warp_fn + base,
+            item_get_fn: self.item_get_fn + base,
         }
     }
 }
@@ -36,7 +56,7 @@ impl TryFrom<(u32, u32, u32)> for Version {
             (maj, min, patch) => {
                 log::error!("Unrecognized version {maj}.{min:02}.{patch}");
                 Err(())
-            }
+            },
         }
     }
 }
@@ -58,10 +78,19 @@ impl From<Version> for BaseAddresses {
 }
 
 pub const BASE_ADDRESSES_1_03_1: BaseAddresses = BaseAddresses {
-    base_a: 0x1a31768,
-    world_chr_man: 0x1c8a530,
-    character_flags: 0x1c77e50,
-    base_menu: 0x1c88d98,
-    world_chr_debug: 0x1c77e88,
+    game_data_man: 0x1c8a530,
+    world_chr_man: 0x1c77e50,
+    menu_man: 0x1c88d98,
+    chr_class_warp: 0x1c74e08,
+    event_flag_man: 0x1c7c5f0,
+    cam_man: 0x1c6e188,
+    chr_follow_cam: 0x1c7a488,
+    graphics_data: 0x1b68ec8,
+    ai_timer: 0x1c823a0,
+    chr_dbg: 0x1c77e59,
+    group_mask: 0x1a2aea0,
+    get_event_flag_fn: 0x4f23d0,
+    set_event_flag_fn: 0x4f22b0,
+    bonfire_warp_fn: 0x4867e0,
+    item_get_fn: 0x7479e0,
 };
-

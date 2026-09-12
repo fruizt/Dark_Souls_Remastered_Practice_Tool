@@ -1,12 +1,10 @@
 use std::fmt::Display;
 
 use log::debug;
-
 use windows::Win32::System::LibraryLoader::GetModuleHandleA;
 
 use crate::codegen::base_addresses::Version;
-use crate::memedit::Bitflag;
-use crate::memedit::*;
+use crate::memedit::{Bitflag, *};
 use crate::prelude::base_addresses::BaseAddresses;
 use crate::version::VERSION;
 
@@ -65,37 +63,33 @@ pub struct PointerChains {
 impl From<BaseAddresses> for PointerChains {
     fn from(value: BaseAddresses) -> Self {
         debug!("{:#?}", value);
-        let BaseAddresses {
-            base_a,
-            world_chr_man,
-            character_flags,
-            base_menu,
-            world_chr_debug,
-        } = value;
+        let BaseAddresses { game_data_man, world_chr_man, menu_man, chr_dbg, .. } = value;
 
-        let off_all_no_damage = 9;
+        // Index into the ChrDbg flag block. Each entry is a whole-byte boolean, so the
+        // mask below is 0b1 rather than a real bitmask.
+        let off_all_no_damage = 0x9;
         let offs_igt = match *VERSION {
             Version::V1_03_1 => 0xa4,
         };
 
         PointerChains {
-            all_no_damage: bitflag!(0b1; world_chr_debug + off_all_no_damage as usize),
-            no_death: bitflag!(0b100000; character_flags, 0x68, 0x524),
-            inf_stamina: bitflag!(0b100; character_flags, 0x68, 0x525),
-            inf_consumables: bitflag!(0b1; character_flags, 0x68, 0x527),
-            gravity: bitflag!(0b1000000; character_flags, 0x68, 0x245),
-            collision: bitflag!(0b1000; character_flags, 0x68,0x68, 0x104),
-            speed: pointer_chain!(character_flags, 0x68, 0x68, 0x18, 0xa8),
-            character_stats: pointer_chain!(world_chr_man, 0x10, 0x40),
-            souls: pointer_chain!(world_chr_man, 0x10, 0x94),
-            cursor_show: bitflag!(0b1; base_menu as _, 0xa8),
-            no_damage: bitflag!(0b100000; character_flags, 0x68, 0x524),
-            no_hit: bitflag!(0b1; character_flags, 0x80, 0x18, 0x1c0),
-            igt: pointer_chain!(world_chr_man as _, offs_igt),
-            bonfire_warp_menu: bitflag!(0b1; base_menu, 0xc0),
+            all_no_damage: bitflag!(0b1; chr_dbg + off_all_no_damage as usize),
+            no_death: bitflag!(0b100000; world_chr_man, 0x68, 0x524),
+            inf_stamina: bitflag!(0b100; world_chr_man, 0x68, 0x525),
+            inf_consumables: bitflag!(0b1; world_chr_man, 0x68, 0x527),
+            gravity: bitflag!(0b1000000; world_chr_man, 0x68, 0x245),
+            collision: bitflag!(0b1000; world_chr_man, 0x68,0x68, 0x104),
+            speed: pointer_chain!(world_chr_man, 0x68, 0x68, 0x18, 0xa8),
+            character_stats: pointer_chain!(game_data_man, 0x10, 0x40),
+            souls: pointer_chain!(game_data_man, 0x10, 0x94),
+            cursor_show: bitflag!(0b1; menu_man as _, 0xa8),
+            no_damage: bitflag!(0b100000; world_chr_man, 0x68, 0x524),
+            no_hit: bitflag!(0b1; world_chr_man, 0x80, 0x18, 0x1c0),
+            igt: pointer_chain!(game_data_man as _, offs_igt),
+            bonfire_warp_menu: bitflag!(0b1; menu_man, 0xc0),
             position: (
-                pointer_chain!(character_flags, 0x68, 0x68, 0x28, 0x4), //angle
-                pointer_chain!(character_flags, 0x68, 0x68, 0x28, 0x10), // position
+                pointer_chain!(world_chr_man, 0x68, 0x68, 0x28, 0x4), // angle
+                pointer_chain!(world_chr_man, 0x68, 0x68, 0x28, 0x10), // position
             ),
         }
     }
