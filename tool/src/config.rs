@@ -14,6 +14,7 @@ use crate::widgets::label::label_widget;
 use crate::widgets::nudge_pos::nudge_position;
 use crate::widgets::open_menu::{open_menu, OpenMenuKind};
 use crate::widgets::position::save_position;
+use crate::widgets::quitout::quitout;
 use crate::widgets::savefile_manager::savefile_manager;
 use crate::widgets::souls::souls;
 use crate::widgets::warp_menu::warp_menu;
@@ -210,10 +211,10 @@ enum CfgCommand {
     //     kind: OpenMenuKind,
     //     hotkey: Option<Key>,
     // },
-    // Quitout {
-    //     #[serde(rename = "quitout")]
-    //     hotkey: PlaceholderOption<Key>,
-    // },
+    Quitout {
+        #[serde(rename = "quitout")]
+        hotkey: PlaceholderOption<Key>,
+    },
     // Target {
     //     #[serde(rename = "target")]
     //     hotkey: PlaceholderOption<Key>,
@@ -258,18 +259,40 @@ impl TryFrom<String> for FlagSpec {
             "inf_stamina" => Ok(FlagSpec::new("Inf Stamina", |c| &c.inf_stamina)),
             // "inf_focus" => Ok(FlagSpec::new("Inf Focus", |c| &c.inf_focus)),
             "inf_consumables" => Ok(FlagSpec::new("Inf Consumables", |c| &c.inf_consumables)),
-            // "deathcam" => Ok(FlagSpec::new("Deathcam", |c| &c.deathcam)),
+            "deathcam" => Ok(FlagSpec::new("Deathcam", |c| &c.deathcam)),
             "no_death" => Ok(FlagSpec::new("No death", |c| &c.no_death)),
+
+            // The rest of the ChrDbg block. "all_*" applies to every character in the
+            // world, "player_*" only to yours.
+            "player_no_dead" => Ok(FlagSpec::new("Player no dead", |c| &c.player_no_dead)),
+            "player_exterminate" => {
+                Ok(FlagSpec::new("Player exterminate", |c| &c.player_exterminate))
+            },
+            "player_hide" => Ok(FlagSpec::new("Player hide", |c| &c.player_hide)),
+            "player_silence" => Ok(FlagSpec::new("Player silence", |c| &c.player_silence)),
+            "all_no_stamina" => Ok(FlagSpec::new("All no stamina", |c| &c.all_no_stamina)),
+            "all_no_mp" => Ok(FlagSpec::new("All no MP", |c| &c.all_no_mp)),
+            "all_no_arrow" => Ok(FlagSpec::new("All no arrow", |c| &c.all_no_arrow)),
+            "all_no_magic_qty" => Ok(FlagSpec::new("All no magic qty", |c| &c.all_no_magic_qty)),
+            "all_no_dead" => Ok(FlagSpec::new("All no dead", |c| &c.all_no_dead)),
+            "all_no_hit" => Ok(FlagSpec::new("All no hit", |c| &c.all_no_hit)),
+            "all_no_attack" => Ok(FlagSpec::new("All no attack", |c| &c.all_no_attack)),
+            "all_no_move" => Ok(FlagSpec::new("All no move", |c| &c.all_no_move)),
+            "ai_disable" => Ok(FlagSpec::new("AI disable", |c| &c.ai_disable)),
+
+            // Render group mask.
+            "rend_chr" => Ok(FlagSpec::new("Render characters", |c| &c.rend_chr)),
+            "rend_obj" => Ok(FlagSpec::new("Render objects", |c| &c.rend_obj)),
+            "rend_map" => Ok(FlagSpec::new("Render map", |c| &c.rend_map)),
+            "rend_sfx" => Ok(FlagSpec::new("Render SFX", |c| &c.rend_sfx)),
+            "rend_cutscene" => Ok(FlagSpec::new("Render cutscenes", |c| &c.rend_cutscene)),
+
             // "one_shot" => Ok(FlagSpec::new("One shot", |c| &c.one_shot)),
             // "evt_draw" => Ok(FlagSpec::new("Event draw", |c| &c.evt_draw)),
             // "bloodstain_draw" => {
             //     Ok(FlagSpec::new("Stable/Bloodstain draw", |c| &c.bloodstain_draw))
             // },
             // "evt_disable" => Ok(FlagSpec::new("Event disable", |c| &c.evt_disable)),
-            // "ai_disable" => Ok(FlagSpec::new("AI disable", |c| &c.ai_disable)),
-            // "rend_chr" => Ok(FlagSpec::new("Render characters", |c| &c.rend_chr)),
-            // "rend_obj" => Ok(FlagSpec::new("Render objects", |c| &c.rend_obj)),
-            // "rend_map" => Ok(FlagSpec::new("Render map", |c| &c.rend_map)),
             // "rend_mesh_hi" => Ok(FlagSpec::new("Collision mesh hi", |c| &c.rend_mesh_hi)),
             // "rend_mesh_lo" => Ok(FlagSpec::new("Collision mesh lo", |c| &c.rend_mesh_lo)),
             // "rend_mesh_hit" => Ok(FlagSpec::new("Collision mesh hit", |c| &c.rend_mesh_hit)),
@@ -319,8 +342,8 @@ impl CfgCommand {
                 cycle_speed(values.as_slice(), chains.speed.clone(), hotkey)
             },
             CfgCommand::Souls { amount, hotkey } => souls(amount, chains.souls.clone(), hotkey),
-            // CfgCommand::Quitout { hotkey } => quitout(chains.quitout.clone(),
-            // hotkey.into_option()), CfgCommand::OpenMenu { hotkey, kind } => {
+            CfgCommand::Quitout { hotkey } => quitout(chains.quitout.clone(), hotkey.into_option()),
+            // CfgCommand::OpenMenu { hotkey, kind } => {
             //     open_menu(kind, chains.travel_ptr, chains.attune_ptr, hotkey)
             // }
             // CfgCommand::Target { hotkey } => Box::new(Target::new(

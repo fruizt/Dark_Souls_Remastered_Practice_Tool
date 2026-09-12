@@ -64,6 +64,10 @@ Everything in this table is implemented and works in-game.
 | --- | --- |
 | **No Death** | Survive at 0 HP. The core practice flag. |
 | **All No Damage** | Take no damage at all. |
+| **Quitout** | Quit to the main menu on a hotkey, without the pause screen. |
+| **Deathcam** | Free the camera from the player. |
+| **World debug flags** | Toggle no-dead, no-hit, no-attack, no-move, AI disable and the consumption flags for every character in the world, or for the player alone. |
+| **Render flags** | Turn drawing of the map, objects, characters, SFX and cutscenes on and off. |
 | **Infinite Stamina** | Stamina never drains. |
 | **Infinite Consumables** | Estus, throwables, and other consumables are not spent. |
 | **No Gravity** | Float — lets you get to geometry you could not otherwise reach. |
@@ -125,14 +129,18 @@ These come from the shipped `dark_souls_remastered_tool.toml` and are entirely y
 | --- | --- |
 | <kbd>0</kbd> | Open / close the overlay |
 | <kbd>RShift</kbd>+<kbd>0</kbd> | Hide the overlay completely (hotkeys keep working) |
+| <kbd>p</kbd> | Quitout |
 | <kbd>1</kbd> | Toggle All No Damage |
 | <kbd>2</kbd> | Toggle Infinite Stamina |
 | <kbd>4</kbd> | Toggle Infinite Consumables |
+| <kbd>5</kbd> | Toggle Deathcam |
 | <kbd>6</kbd> | Toggle No Death |
 | <kbd>8</kbd> | Cycle game speed |
 | <kbd>9</kbd> | Add 10,000 souls |
+| <kbd>F1</kbd> | Toggle AI Disable |
 | <kbd>F2</kbd> | Toggle No Gravity |
 | <kbd>F3</kbd> | Toggle No Collision |
+| <kbd>F4</kbd> / <kbd>F5</kbd> / <kbd>F6</kbd> | Toggle rendering of characters / objects / map |
 | <kbd>F9</kbd> | Open the bonfire warp menu |
 | <kbd>Ctrl</kbd>+<kbd>O</kbd> | Open the savefile manager |
 | <kbd>RShift</kbd>+<kbd>H</kbd> / <kbd>J</kbd> / <kbd>K</kbd> | Save position into slot 1 / 2 / 3 |
@@ -173,13 +181,25 @@ widget is click-only.
 | `nudge` | `{ nudge = 1.0, nudge_up = "[", nudge_down = "]" }` | Step size in world units. |
 | `cycle_speed` | `{ cycle_speed = [0.5, 1.0, 2.0], hotkey = "8" }` | Cycles in ascending order, wrapping around. |
 | `souls` | `{ souls = 10000, hotkey = "9" }` | Adds to the current total rather than replacing it. |
+| `quitout` | `{ quitout = "p" }` | Quit to the main menu. Writes the game's own menu-kick field, so the save is written normally. |
 | `character_stats` | `{ character_stats = true }` | Opens the stat editor panel. Can take a hotkey instead of `true`. |
 | `savefile_manager` | `{ savefile_manager = "ctrl+o" }` | Auto-discovers your save directory under `Documents\NBGI\DARK SOULS REMASTERED`. |
 | `label` | `{ label = "Some heading" }` | Static text. An empty string is a spacer. |
 | `group` | `{ group = "Positions", commands = [ … ] }` | Nests commands into a collapsible group. |
 
-**Available flags:** `all_no_damage`, `inf_stamina`, `inf_consumables`, `no_death`, `gravity`
-(i.e. *no* gravity), `collision` (i.e. *no* collision), and `wrap_menu`.
+**Available flags:**
+
+- *Player:* `no_death`, `inf_stamina`, `inf_consumables`, `gravity` (i.e. *no* gravity),
+  `collision` (i.e. *no* collision), `player_no_dead`, `player_exterminate`, `player_hide`,
+  `player_silence`.
+- *Every character in the world:* `all_no_damage`, `all_no_dead`, `all_no_hit`, `all_no_attack`,
+  `all_no_move`, `all_no_stamina`, `all_no_mp`, `all_no_arrow`, `all_no_magic_qty`, `ai_disable`.
+- *Rendering:* `rend_map`, `rend_obj`, `rend_chr`, `rend_sfx`, `rend_cutscene`.
+- *Other:* `deathcam`, `wrap_menu`.
+
+The `all_*` and `player_*` flags and `all_no_damage` are whole-byte booleans in the game's debug
+flag block, not bits in a character struct — which is why they apply world-wide and survive a
+reload.
 
 > `wrap_menu` is a typo for *warp* menu that is currently baked into the config key. It is left
 > as-is so existing configs keep working; renaming it with a backwards-compatible alias is on the
@@ -238,10 +258,13 @@ Scaffolding exists for these — they are commented out in `tool/src/config.rs` 
 - **Open menu (travel / attune)** — `tool/src/widgets/open_menu.rs` calls into the game's menu
   functions directly. Currently crashes the game; the AOB signatures for the menu functions need
   revisiting.
-- **Quitout** — instant quit-to-menu, the single most useful speedrun tool. Highest priority.
-- **Target lock info**, **deathcam**, **one shot**, **ember**, **infinite focus**, **AI disable**,
-  **event disable**.
-- **Render / debug draw flags** — hurtboxes, collision mesh, debug spheres, IK foot rays.
+- **Target lock info**, **one shot**, **event disable**. (**Ember** and **infinite focus** are DS3
+  mechanics with no Dark Souls equivalent and will not be added.)
+- **Debug draw flags** — hurtboxes, collision mesh, debug spheres, IK foot rays. Remastered does
+  not appear to expose the render path DS3 uses for these.
+- **Event flags** — read and set story flags to jump the route to a given state.
+- **Bonfire warp** and **item spawner** — both need the tool to call game functions, which is the
+  riskiest class of change here; the base addresses are scanned but nothing calls them yet.
 - **Multi-version support** — see version detection above.
 
 ---

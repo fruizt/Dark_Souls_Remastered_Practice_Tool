@@ -3,6 +3,7 @@ commands = [
   { character_stats = true },
   { cycle_speed = [0.5, 1.0, 2.0, 5.0], hotkey = "8" },
   { souls = 10000, hotkey = "9" },
+  { quitout = "p" },
   { group = "Positions", commands = [
     { nudge = 1.0, nudge_up = "[", nudge_down = "]" },
     { position = "h", save = "rshift+h" },
@@ -12,10 +13,35 @@ commands = [
   { flag = "all_no_damage", hotkey = "1" },
   { flag = "inf_stamina", hotkey = "2" },
   { flag = "inf_consumables", hotkey = "4" },
+  { flag = "deathcam", hotkey = "5" },
   { flag = "no_death", hotkey = "6" },
+  { flag = "ai_disable", hotkey = "f1" },
   { flag = "gravity", hotkey = "f2" },
   { flag = "collision", hotkey = "f3" },
   { flag = "wrap_menu", hotkey = "f9" },
+  { group = "All characters", commands = [
+    { flag = "all_no_dead" },
+    { flag = "all_no_hit" },
+    { flag = "all_no_attack" },
+    { flag = "all_no_move" },
+    { flag = "all_no_stamina" },
+    { flag = "all_no_mp" },
+    { flag = "all_no_arrow" },
+    { flag = "all_no_magic_qty" },
+  ]},
+  { group = "Player only", commands = [
+    { flag = "player_no_dead" },
+    { flag = "player_exterminate" },
+    { flag = "player_hide" },
+    { flag = "player_silence" },
+  ]},
+  { group = "Render flags", commands = [
+    { flag = "rend_chr", hotkey = "f4" },
+    { flag = "rend_obj", hotkey = "f5" },
+    { flag = "rend_map", hotkey = "f6" },
+    { flag = "rend_sfx" },
+    { flag = "rend_cutscene" },
+  ]},
 ]
 
 [settings]

@@ -58,15 +58,41 @@ pub struct PointerChains {
     pub igt: PointerChain<u32>,
     pub bonfire_warp_menu: Bitflag<u8>,
     pub position: (PointerChain<f32>, PointerChain<[f32; 3]>),
+    pub deathcam: Bitflag<u8>,
+    pub quitout: PointerChain<i32>,
+
+    // The rest of the ChrDbg block. Every entry is a whole-byte boolean, so each of
+    // these is masked with `0b1` rather than a real bit.
+    pub player_no_dead: Bitflag<u8>,
+    pub player_exterminate: Bitflag<u8>,
+    pub all_no_stamina: Bitflag<u8>,
+    pub all_no_mp: Bitflag<u8>,
+    pub all_no_arrow: Bitflag<u8>,
+    pub all_no_magic_qty: Bitflag<u8>,
+    pub player_hide: Bitflag<u8>,
+    pub player_silence: Bitflag<u8>,
+    pub all_no_dead: Bitflag<u8>,
+    pub all_no_hit: Bitflag<u8>,
+    pub all_no_attack: Bitflag<u8>,
+    pub all_no_move: Bitflag<u8>,
+    pub ai_disable: Bitflag<u8>,
+
+    // Render group mask: five consecutive bytes in `.data`, one per draw group.
+    pub rend_map: Bitflag<u8>,
+    pub rend_obj: Bitflag<u8>,
+    pub rend_chr: Bitflag<u8>,
+    pub rend_sfx: Bitflag<u8>,
+    pub rend_cutscene: Bitflag<u8>,
 }
 
 impl From<BaseAddresses> for PointerChains {
     fn from(value: BaseAddresses) -> Self {
         debug!("{:#?}", value);
-        let BaseAddresses { game_data_man, world_chr_man, menu_man, chr_dbg, .. } = value;
+        let BaseAddresses { game_data_man, world_chr_man, menu_man, chr_dbg, group_mask, .. } =
+            value;
 
-        // Index into the ChrDbg flag block. Each entry is a whole-byte boolean, so the
-        // mask below is 0b1 rather than a real bitmask.
+        // Indices into the ChrDbg flag block. Each entry is a whole-byte boolean, so
+        // the masks below are 0b1 rather than real bitmasks.
         let off_all_no_damage = 0x9;
         let offs_igt = match *VERSION {
             Version::V1_03_1 => 0xa4,
@@ -91,6 +117,29 @@ impl From<BaseAddresses> for PointerChains {
                 pointer_chain!(world_chr_man, 0x68, 0x68, 0x28, 0x4), // angle
                 pointer_chain!(world_chr_man, 0x68, 0x68, 0x28, 0x10), // position
             ),
+            deathcam: bitflag!(0b1; world_chr_man, 0x70),
+            // Menu kick. Writing 2 here is what quits out to the main menu.
+            quitout: pointer_chain!(menu_man, 0x24c),
+
+            player_no_dead: bitflag!(0b1; chr_dbg + 0x0),
+            player_exterminate: bitflag!(0b1; chr_dbg + 0x1),
+            all_no_stamina: bitflag!(0b1; chr_dbg + 0x2),
+            all_no_mp: bitflag!(0b1; chr_dbg + 0x3),
+            all_no_arrow: bitflag!(0b1; chr_dbg + 0x4),
+            all_no_magic_qty: bitflag!(0b1; chr_dbg + 0x5),
+            player_hide: bitflag!(0b1; chr_dbg + 0x6),
+            player_silence: bitflag!(0b1; chr_dbg + 0x7),
+            all_no_dead: bitflag!(0b1; chr_dbg + 0x8),
+            all_no_hit: bitflag!(0b1; chr_dbg + 0xa),
+            all_no_attack: bitflag!(0b1; chr_dbg + 0xb),
+            all_no_move: bitflag!(0b1; chr_dbg + 0xc),
+            ai_disable: bitflag!(0b1; chr_dbg + 0xd),
+
+            rend_map: bitflag!(0b1; group_mask + 0x0),
+            rend_obj: bitflag!(0b1; group_mask + 0x1),
+            rend_chr: bitflag!(0b1; group_mask + 0x2),
+            rend_sfx: bitflag!(0b1; group_mask + 0x3),
+            rend_cutscene: bitflag!(0b1; group_mask + 0x4),
         }
     }
 }
