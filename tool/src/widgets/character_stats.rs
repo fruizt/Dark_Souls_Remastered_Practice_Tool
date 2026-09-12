@@ -50,10 +50,7 @@ pub(crate) fn character_stats_edit(
     key_close: Key,
 ) -> Box<dyn Widget> {
     Box::new(StatsEditor::new(
-        CharacterStatsEdit {
-            ptr: character_stats,
-            stats: None,
-        },
+        CharacterStatsEdit { ptr: character_stats, stats: None },
         key_open,
         Some(key_close),
     ))

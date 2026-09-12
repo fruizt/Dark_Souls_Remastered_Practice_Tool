@@ -2,7 +2,6 @@ mod inject;
 
 use hudhook::tracing::trace;
 use tracing_subscriber::filter::LevelFilter;
-
 use windows::core::PCSTR;
 use windows::Win32::Foundation::HWND;
 use windows::Win32::UI::WindowsAndMessaging::{MessageBoxA, MB_ICONERROR, MB_OK};

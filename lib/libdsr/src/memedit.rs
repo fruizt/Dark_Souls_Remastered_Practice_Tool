@@ -4,7 +4,6 @@ use windows::Win32::Foundation::HANDLE;
 use windows::Win32::System::Diagnostics::Debug::{ReadProcessMemory, WriteProcessMemory};
 use windows::Win32::System::Threading::GetCurrentProcess;
 
-
 #[derive(Clone, Debug)]
 pub struct PointerChain<T> {
     proc: HANDLE,

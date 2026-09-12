@@ -32,8 +32,7 @@ fn run_python_script() -> Result<()> {
         bail!("python codegen failed");
     }
 
-    File::create(project_root().join("lib/libdsr/param_data.rs"))?
-        .write_all(&cmd.stdout)?;
+    File::create(project_root().join("lib/libdsr/param_data.rs"))?.write_all(&cmd.stdout)?;
 
     Ok(())
 }

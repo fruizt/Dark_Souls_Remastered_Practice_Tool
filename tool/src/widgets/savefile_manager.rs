@@ -10,10 +10,14 @@ pub(crate) fn savefile_manager(key_load: Option<Key>, key_close: Key) -> Box<dyn
 
 fn get_savefile_path() -> Result<PathBuf, String> {
     let re = regex::Regex::new(r"^[a-f0-9]+$").unwrap();
-    let savefile_path: PathBuf =
-        [std::env::var("USERPROFILE").map_err(|e| format!("{}", e))?.as_str(), "Documents", "NBGI", "DARK SOULS REMASTERED"]
-            .iter()
-            .collect();
+    let savefile_path: PathBuf = [
+        std::env::var("USERPROFILE").map_err(|e| format!("{}", e))?.as_str(),
+        "Documents",
+        "NBGI",
+        "DARK SOULS REMASTERED",
+    ]
+    .iter()
+    .collect();
     std::fs::read_dir(savefile_path)
         .map_err(|e| format!("{}", e))?
         .filter_map(|e| e.ok())

@@ -97,7 +97,7 @@ impl Tool {
                     .with(file_layer)
                     .with(stdout_layer)
                     .init();
-            }
+            },
             e => {
                 tracing_subscriber::fmt()
                     .with_max_level(config.settings.log_level.inner())
@@ -113,7 +113,7 @@ impl Tool {
                     Some(Err(e)) => error!("Could not initialize log file: {:?}", e),
                     _ => unreachable!(),
                 }
-            }
+            },
         }
 
         if let Some(err) = config_err {
@@ -302,10 +302,9 @@ impl Tool {
 
                     match indicator.indicator {
                         IndicatorType::Position => {
-                            if let (Some([x, y, z]), Some(a)) = (
-                                self.pointers.position.1.read(),
-                                self.pointers.position.0.read(),
-                            ) {
+                            if let (Some([x, y, z]), Some(a)) =
+                                (self.pointers.position.1.read(), self.pointers.position.0.read())
+                            {
                                 self.position_bufs.iter_mut().for_each(String::clear);
                                 write!(self.position_bufs[0], "{x:.3}").ok();
                                 write!(self.position_bufs[1], "{y:.3}").ok();
@@ -329,7 +328,7 @@ impl Tool {
                                 ui.same_line();
                                 ui.text(&self.position_bufs[3]);
                             }
-                        }
+                        },
                         IndicatorType::PositionChange => {
                             if let Some([x, y, z]) = self.pointers.position.1.read() {
                                 let position_change_xyz = ((x - self.position_prev[0]).powf(2.0)
@@ -354,7 +353,7 @@ impl Tool {
 
                                 self.position_prev = [x, y, z];
                             }
-                        }
+                        },
                         IndicatorType::Igt => {
                             if let Some(igt) = self.pointers.igt.read() {
                                 let millis = (igt % 1000) / 10;
@@ -370,19 +369,19 @@ impl Tool {
                                 .ok();
                                 ui.text(&self.igt_buf);
                             }
-                        }
+                        },
                         IndicatorType::GameVersion => {
                             ui.text(&self.version_label);
-                        }
+                        },
                         IndicatorType::FrameCount => {
                             self.framecount_buf.clear();
                             write!(self.framecount_buf, "Frame count {0}", self.framecount,).ok();
                             ui.text(&self.framecount_buf);
-                        }
+                        },
                         IndicatorType::ImguiDebug => {
                             imgui_debug(ui);
-                        }
-                        _ => {}
+                        },
+                        _ => {},
                     }
                 }
 
@@ -450,11 +449,7 @@ impl Tool {
 impl ImguiRenderLoop for Tool {
     fn render(&mut self, ui: &mut imgui::Ui) {
         let display = self.settings.display.is_pressed(ui);
-        let hide = self
-            .settings
-            .hide
-            .map(|k| k.is_pressed(ui))
-            .unwrap_or(false);
+        let hide = self.settings.hide.map(|k| k.is_pressed(ui)).unwrap_or(false);
 
         self.framecount += 1;
 
@@ -467,9 +462,9 @@ impl ImguiRenderLoop for Tool {
             };
 
             match &self.ui_state {
-                UiState::MenuOpen => {}
-                UiState::Closed => { self.pointers.cursor_show.set(false) }
-                UiState::Hidden => { self.pointers.cursor_show.set(false) }
+                UiState::MenuOpen => {},
+                UiState::Closed => self.pointers.cursor_show.set(false),
+                UiState::Hidden => self.pointers.cursor_show.set(false),
             }
         }
 
@@ -477,13 +472,13 @@ impl ImguiRenderLoop for Tool {
             UiState::MenuOpen => {
                 self.pointers.cursor_show.set(true);
                 self.render_visible(ui);
-            }
+            },
             UiState::Closed => {
                 self.render_closed(ui);
-            }
+            },
             UiState::Hidden => {
                 self.render_hidden(ui);
-            }
+            },
         }
 
         for w in &mut self.widgets {
@@ -491,14 +486,8 @@ impl ImguiRenderLoop for Tool {
         }
 
         let now = Instant::now();
-        self.log.extend(
-            self.log_rx
-                .try_iter()
-                .inspect(|log| info!("{}", log))
-                .map(|l| (now, l)),
-        );
-        self.log
-            .retain(|(tm, _)| tm.elapsed() < std::time::Duration::from_secs(5));
+        self.log.extend(self.log_rx.try_iter().inspect(|log| info!("{}", log)).map(|l| (now, l)));
+        self.log.retain(|(tm, _)| tm.elapsed() < std::time::Duration::from_secs(5));
 
         self.render_logs(ui);
 

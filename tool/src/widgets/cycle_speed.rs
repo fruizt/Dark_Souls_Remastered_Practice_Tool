@@ -1,12 +1,10 @@
 use std::cmp::Ordering;
 use std::fmt::Write;
 
-
+use libdsr::prelude::*;
 use practice_tool_core::key::Key;
 use practice_tool_core::widgets::store_value::{ReadWrite, StoreValue};
 use practice_tool_core::widgets::Widget;
-
-use libdsr::prelude::*;
 
 #[derive(Debug)]
 struct CycleSpeed {

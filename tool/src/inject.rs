@@ -91,10 +91,8 @@ unsafe fn get_process_by_name64(name_str: &str) -> Result<HANDLE> {
     let name = HSTRING::from(name_str);
 
     let snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)?;
-    let mut process_entry32 = PROCESSENTRY32W {
-        dwSize: mem::size_of::<PROCESSENTRY32W>() as u32,
-        ..Default::default()
-    };
+    let mut process_entry32 =
+        PROCESSENTRY32W { dwSize: mem::size_of::<PROCESSENTRY32W>() as u32, ..Default::default() };
 
     if Process32FirstW(snapshot, &mut process_entry32).is_err() {
         CloseHandle(snapshot)?;

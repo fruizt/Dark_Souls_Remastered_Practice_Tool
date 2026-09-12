@@ -1,12 +1,7 @@
 use libdsr::prelude::PointerChain;
-use practice_tool_core::{
-    key::Key,
-    widgets::{
-        label,
-        store_value::{ReadWrite, StoreValue},
-        Widget,
-    },
-};
+use practice_tool_core::key::Key;
+use practice_tool_core::widgets::store_value::{ReadWrite, StoreValue};
+use practice_tool_core::widgets::{label, Widget};
 
 #[derive(Debug)]
 struct WrapMenu {
@@ -18,12 +13,7 @@ struct WrapMenu {
 
 impl WrapMenu {
     fn new(ptr: PointerChain<u8>) -> Self {
-        WrapMenu {
-            ptr,
-            current: 0,
-            amount: 1,
-            label: "Open Wrap Menu".to_string(),
-        }
+        WrapMenu { ptr, current: 0, amount: 1, label: "Open Wrap Menu".to_string() }
     }
 }
 

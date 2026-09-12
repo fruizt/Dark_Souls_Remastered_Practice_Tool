@@ -1,5 +1,11 @@
 use std::str::FromStr;
 
+use libdsr::prelude::*;
+use practice_tool_core::key::Key;
+use practice_tool_core::widgets::Widget;
+use serde::Deserialize;
+use tracing_subscriber::filter::LevelFilter;
+
 use crate::widgets::character_stats::character_stats_edit;
 use crate::widgets::cycle_speed::cycle_speed;
 use crate::widgets::flag::flag_widget;
@@ -11,11 +17,6 @@ use crate::widgets::position::save_position;
 use crate::widgets::savefile_manager::savefile_manager;
 use crate::widgets::souls::souls;
 use crate::widgets::warp_menu::warp_menu;
-use libdsr::prelude::*;
-use practice_tool_core::key::Key;
-use practice_tool_core::widgets::Widget;
-use serde::Deserialize;
-use tracing_subscriber::filter::LevelFilter;
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct Config {
@@ -29,10 +30,7 @@ impl Config {
     }
 
     pub(crate) fn make_commands(self, chains: &PointerChains) -> Vec<Box<dyn Widget>> {
-        self.commands
-            .into_iter()
-            .map(|c| c.into_widget(&self.settings, chains))
-            .collect()
+        self.commands.into_iter().map(|c| c.into_widget(&self.settings, chains)).collect()
     }
 }
 
@@ -72,38 +70,14 @@ pub(crate) struct Indicator {
 impl Indicator {
     fn default_set() -> Vec<Indicator> {
         vec![
-            Indicator {
-                indicator: IndicatorType::GameVersion,
-                enabled: true,
-            },
-            Indicator {
-                indicator: IndicatorType::Igt,
-                enabled: true,
-            },
-            Indicator {
-                indicator: IndicatorType::Position,
-                enabled: false,
-            },
-            Indicator {
-                indicator: IndicatorType::PositionChange,
-                enabled: false,
-            },
-            Indicator {
-                indicator: IndicatorType::Animation,
-                enabled: false,
-            },
-            Indicator {
-                indicator: IndicatorType::Fps,
-                enabled: false,
-            },
-            Indicator {
-                indicator: IndicatorType::FrameCount,
-                enabled: false,
-            },
-            Indicator {
-                indicator: IndicatorType::ImguiDebug,
-                enabled: false,
-            },
+            Indicator { indicator: IndicatorType::GameVersion, enabled: true },
+            Indicator { indicator: IndicatorType::Igt, enabled: true },
+            Indicator { indicator: IndicatorType::Position, enabled: false },
+            Indicator { indicator: IndicatorType::PositionChange, enabled: false },
+            Indicator { indicator: IndicatorType::Animation, enabled: false },
+            Indicator { indicator: IndicatorType::Fps, enabled: false },
+            Indicator { indicator: IndicatorType::FrameCount, enabled: false },
+            Indicator { indicator: IndicatorType::ImguiDebug, enabled: false },
         ]
     }
 }
@@ -119,38 +93,27 @@ impl TryFrom<IndicatorConfig> for Indicator {
 
     fn try_from(indicator: IndicatorConfig) -> Result<Self, Self::Error> {
         match indicator.indicator.as_str() {
-            "igt" => Ok(Indicator {
-                indicator: IndicatorType::Igt,
-                enabled: indicator.enabled,
-            }),
-            "position" => Ok(Indicator {
-                indicator: IndicatorType::Position,
-                enabled: indicator.enabled,
-            }),
+            "igt" => Ok(Indicator { indicator: IndicatorType::Igt, enabled: indicator.enabled }),
+            "position" => {
+                Ok(Indicator { indicator: IndicatorType::Position, enabled: indicator.enabled })
+            },
             "position_change" => Ok(Indicator {
                 indicator: IndicatorType::PositionChange,
                 enabled: indicator.enabled,
             }),
-            "game_version" => Ok(Indicator {
-                indicator: IndicatorType::GameVersion,
-                enabled: indicator.enabled,
-            }),
-            "imgui_debug" => Ok(Indicator {
-                indicator: IndicatorType::ImguiDebug,
-                enabled: indicator.enabled,
-            }),
-            "fps" => Ok(Indicator {
-                indicator: IndicatorType::Fps,
-                enabled: indicator.enabled,
-            }),
-            "framecount" => Ok(Indicator {
-                indicator: IndicatorType::FrameCount,
-                enabled: indicator.enabled,
-            }),
-            "animation" => Ok(Indicator {
-                indicator: IndicatorType::Animation,
-                enabled: indicator.enabled,
-            }),
+            "game_version" => {
+                Ok(Indicator { indicator: IndicatorType::GameVersion, enabled: indicator.enabled })
+            },
+            "imgui_debug" => {
+                Ok(Indicator { indicator: IndicatorType::ImguiDebug, enabled: indicator.enabled })
+            },
+            "fps" => Ok(Indicator { indicator: IndicatorType::Fps, enabled: indicator.enabled }),
+            "framecount" => {
+                Ok(Indicator { indicator: IndicatorType::FrameCount, enabled: indicator.enabled })
+            },
+            "animation" => {
+                Ok(Indicator { indicator: IndicatorType::Animation, enabled: indicator.enabled })
+            },
             value => Err(format!("Unrecognized indicator: {value}")),
         }
     }
@@ -182,9 +145,10 @@ impl TryFrom<String> for LevelFilterSerde {
     type Error = String;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
-        Ok(LevelFilterSerde(LevelFilter::from_str(&value).map_err(
-            |e| format!("Couldn't parse log level filter: {}", e),
-        )?))
+        Ok(LevelFilterSerde(
+            LevelFilter::from_str(&value)
+                .map_err(|e| format!("Couldn't parse log level filter: {}", e))?,
+        ))
     }
 }
 
@@ -281,10 +245,7 @@ impl std::fmt::Debug for FlagSpec {
 
 impl FlagSpec {
     fn new(label: &str, getter: fn(&PointerChains) -> &Bitflag<u8>) -> FlagSpec {
-        FlagSpec {
-            label: label.to_string(),
-            getter,
-        }
+        FlagSpec { label: label.to_string(), getter }
     }
 }
 
@@ -331,11 +292,11 @@ impl CfgCommand {
         match self {
             CfgCommand::Flag { flag, hotkey: key } => {
                 flag_widget(&flag.label, (flag.getter)(chains).clone(), key)
-            }
+            },
             CfgCommand::Label { label } => label_widget(label.as_str()),
-            CfgCommand::SavefileManager {
-                hotkey_load: key_load,
-            } => savefile_manager(key_load.into_option(), settings.display),
+            CfgCommand::SavefileManager { hotkey_load: key_load } => {
+                savefile_manager(key_load.into_option(), settings.display)
+            },
             // CfgCommand::ItemSpawner { hotkey_load: key_load } => Box::new(ItemSpawner::new(
             //     chains.spawn_item_func_ptr as usize,
             //     chains.map_item_man as usize,
@@ -345,12 +306,10 @@ impl CfgCommand {
             // )),
             CfgCommand::Position { position, save } => {
                 save_position(chains.position.clone(), position.into_option(), save)
-            }
-            CfgCommand::NudgePosition {
-                nudge,
-                nudge_up,
-                nudge_down,
-            } => nudge_position(chains.position.clone(), nudge, nudge_up, nudge_down),
+            },
+            CfgCommand::NudgePosition { nudge, nudge_up, nudge_down } => {
+                nudge_position(chains.position.clone(), nudge, nudge_up, nudge_down)
+            },
             CfgCommand::CharacterStats { value } => character_stats_edit(
                 chains.character_stats.clone(),
                 value.into_option(),
@@ -358,10 +317,10 @@ impl CfgCommand {
             ),
             CfgCommand::CycleSpeed { values, hotkey } => {
                 cycle_speed(values.as_slice(), chains.speed.clone(), hotkey)
-            }
+            },
             CfgCommand::Souls { amount, hotkey } => souls(amount, chains.souls.clone(), hotkey),
-            // CfgCommand::Quitout { hotkey } => quitout(chains.quitout.clone(), hotkey.into_option()),
-            // CfgCommand::OpenMenu { hotkey, kind } => {
+            // CfgCommand::Quitout { hotkey } => quitout(chains.quitout.clone(),
+            // hotkey.into_option()), CfgCommand::OpenMenu { hotkey, kind } => {
             //     open_menu(kind, chains.travel_ptr, chains.attune_ptr, hotkey)
             // }
             // CfgCommand::Target { hotkey } => Box::new(Target::new(
@@ -371,10 +330,7 @@ impl CfgCommand {
             // )),
             CfgCommand::Group { label, commands } => group(
                 label.as_str(),
-                commands
-                    .into_iter()
-                    .map(|c| c.into_widget(settings, chains))
-                    .collect(),
+                commands.into_iter().map(|c| c.into_widget(settings, chains)).collect(),
                 settings.display,
             ),
         }
@@ -391,10 +347,7 @@ mod tests {
             "{:#?}",
             toml::from_str::<toml::Value>(include_str!("../../dark_souls_remastered_tool.toml"))
         );
-        println!(
-            "{:#?}",
-            Config::parse(include_str!("../../dark_souls_remastered_tool.toml"))
-        );
+        println!("{:#?}", Config::parse(include_str!("../../dark_souls_remastered_tool.toml")));
     }
 
     #[test]
