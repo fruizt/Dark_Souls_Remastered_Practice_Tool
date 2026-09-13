@@ -12,7 +12,7 @@
 
 use std::thread;
 
-use crate::memedit::PointerChain;
+use crate::memedit::{writes_enabled, PointerChain};
 
 /// Warp to the bonfire currently recorded as your last one.
 ///
@@ -45,6 +45,10 @@ impl BonfireWarp {
     /// Returns false if there was nothing to call with; the call itself is fire
     /// and forget, since the game tears down the map underneath it.
     pub fn warp(&self) -> bool {
+        if !writes_enabled() {
+            return false;
+        }
+
         let Some(instance) = self.instance() else {
             return false;
         };
@@ -133,7 +137,7 @@ impl ItemSpawn {
     ///
     /// Returns false without calling anything if there is no character loaded.
     pub fn spawn(&self, category: u32, item_id: u32, quantity: u32) -> bool {
-        if !self.is_ready() {
+        if !writes_enabled() || !self.is_ready() {
             return false;
         }
 

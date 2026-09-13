@@ -8,9 +8,9 @@ warp to saved coordinates, edit your character's stats, change game speed, and r
 position live — the things you actually need when you are grinding a route or drilling a boss.
 
 > **Status: works, on patch 1.03.1.** Every feature in the table below has been used against a
-> running game, not just compiled — including the two that call into the game's own code. The tool
-> does **not** yet detect which patch it is attached to, so on any other build it will read and
-> write meaningless addresses; see [Status & roadmap](#status--roadmap).
+> running game, not just compiled — including the two that call into the game's own code. On any
+> other patch the tool now says so and disables every write rather than acting on addresses that
+> mean nothing there.
 
 ![The overlay open in-game, showing the full widget list](docs/overlay.png)
 
@@ -86,6 +86,7 @@ Everything in this table is implemented and works in-game.
 | **Grouped & labelled widgets** | Organise the overlay into collapsible groups from the config file. |
 | **In-game log** | Widget actions print to a transient on-screen log, and to a rotating log file. |
 | **Clean eject** | Unhook and unload the DLL from inside the overlay without restarting the game. |
+| **Version guard** | Detects the game build from its PE headers. On anything the addresses were not generated for, the overlay says so and every write is switched off. |
 
 ---
 
@@ -251,7 +252,6 @@ likely to break on another patch.
 
 | Item | Detail |
 | --- | --- |
-| **Version detection** | `libdsr::version::get_version()` returns `V1_03_1` unconditionally instead of reading the PE version at runtime, so the tool attaches to any patch and writes to addresses that mean nothing there. The AOB scanner already handles multiple versions; only the runtime lookup is stubbed. This is the most important thing left. |
 | **Event flags** | Read and write work, and the panel lists the 26 documented boss flags by name, but that is a small slice of the flags the game has. Anything else needs its numeric ID. |
 | **Warp menu** | The `wrap_menu` bitflag forces the travel menu open, but the dedicated `warp_menu` widget (`tool/src/widgets/warp_menu.rs`) is not wired into the config and is not functional. |
 | **`show_console`** | Parsed from the config and then never read — the console is always allocated. |

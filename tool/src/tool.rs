@@ -12,6 +12,7 @@ use tracing_subscriber::prelude::*;
 
 use crate::config::{Config, IndicatorType, Settings};
 use crate::util;
+use crate::widgets::label::label_widget;
 
 enum UiState {
     MenuOpen,
@@ -120,14 +121,46 @@ impl Tool {
             debug!("{:?}", err);
         }
 
+        // Forcing this first is what disables writes on a build the addresses
+        // were not generated for, before any widget can act on them.
+        let version_state = *VERSION_STATE;
         let pointers = PointerChains::new();
         info!("pointers {:?}", pointers);
-        let version_label = {
-            let (maj, min, patch) = (*VERSION).into();
-            format!("Game Ver {}.{:02}.{}", maj, min, patch)
+
+        let version_label = match version_state {
+            VersionState::Supported(_) => {
+                let (maj, min, patch) = (*VERSION).into();
+                format!("Game Ver {}.{:02}.{}", maj, min, patch)
+            },
+            VersionState::Unsupported { size_of_image } => {
+                error!("Unsupported game version (module {size_of_image:#x})");
+                format!("UNSUPPORTED BUILD ({size_of_image:#x})")
+            },
+            VersionState::Unreadable => {
+                error!("Couldn't read the game's PE headers");
+                String::from("UNSUPPORTED BUILD (unreadable)")
+            },
         };
+
         let settings = config.settings.clone();
-        let widgets = config.make_commands(&pointers);
+
+        // On an unsupported build the widgets would read and write meaningless
+        // addresses, so none are built: the overlay says why instead.
+        let widgets = if version_state.is_supported() {
+            config.make_commands(&pointers)
+        } else {
+            let (maj, min, patch) = (*VERSION).into();
+            vec![
+                label_widget("!! UNSUPPORTED GAME VERSION !!"),
+                label_widget(""),
+                label_widget(&format!("This build only knows {maj}.{min:02}.{patch}.")),
+                label_widget("Writes are disabled, so nothing here"),
+                label_widget("can corrupt your save."),
+                label_widget(""),
+                label_widget("Run `cargo xtask` against this game"),
+                label_widget("to generate addresses for it."),
+            ]
+        };
 
         let (log_tx, log_rx) = crossbeam_channel::unbounded();
         info!("Initialized");

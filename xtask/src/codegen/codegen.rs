@@ -18,6 +18,10 @@ impl Version {
 
 struct VersionData<'a> {
     version: Version,
+    /// The mapped size of the executable. Distinct per patch, and readable from
+    /// the PE headers of the running module, so it is what the tool uses at
+    /// runtime to work out which build it is attached to.
+    size_of_image: u32,
     aobs: Vec<(&'a str, usize)>,
 }
 
@@ -277,7 +281,7 @@ fn codegen_version_enum(ver: &[VersionData]) -> String {
 
     // pub enum Version
 
-    string.push_str("#[derive(Clone, Copy)]\n");
+    string.push_str("#[derive(Debug, Clone, Copy, PartialEq, Eq)]\n");
     string.push_str("pub enum Version {\n");
 
     for v in ver {
@@ -331,6 +335,62 @@ fn codegen_version_enum(ver: &[VersionData]) -> String {
     string.push_str("    }\n");
     string.push_str("}\n\n");
 
+    // impl Version { from_module_size, LATEST }
+
+    string.push_str(
+        "impl Version {
+",
+    );
+    string.push_str(
+        "    /// Every version the addresses below were generated against, keyed by
+",
+    );
+    string.push_str(
+        "    /// the mapped size of its executable.
+",
+    );
+    string.push_str(
+        "    pub const KNOWN: &'static [(usize, Version)] = &[
+",
+    );
+
+    for v in ver {
+        let Version(maj, min, patch) = v.version;
+        writeln!(string, "        ({:#x}, Version::V{maj}_{min:02}_{patch}),", v.size_of_image)
+            .unwrap();
+    }
+
+    string.push_str(
+        "    ];
+
+",
+    );
+    string.push_str(
+        "    /// The build a module of this size is, or `None` for one we have no
+",
+    );
+    string.push_str(
+        "    /// addresses for.
+",
+    );
+    string.push_str(
+        "    pub fn from_module_size(size: usize) -> Option<Version> {
+",
+    );
+    string.push_str(
+        "        Self::KNOWN.iter().find(|(s, _)| *s == size).map(|(_, v)| *v)
+",
+    );
+    string.push_str(
+        "    }
+",
+    );
+    string.push_str(
+        "}
+
+",
+    );
+
     // impl From<Version> for BaseAddresses
 
     string.push_str("impl From<Version> for BaseAddresses {\n");
@@ -374,8 +434,15 @@ pub fn codegen_base_addresses(
                 println!("\nVERSION {}: {:?}", version.to_fromsoft_string(), exe);
 
                 let aobs = find_aobs(&pe_file, aobs);
+                // PeFile wraps both widths; DSR is 64 bit, but matching keeps
+                // this honest rather than unwrapping a variant.
+                let size_of_image = match pe_file.optional_header() {
+                    pelite::Wrap::T32(header) => header.SizeOfImage,
+                    pelite::Wrap::T64(header) => header.SizeOfImage,
+                };
+                println!("  SizeOfImage {size_of_image:#x}");
                 processed_versions.insert(version);
-                Some(VersionData { version, aobs })
+                Some(VersionData { version, size_of_image, aobs })
             }
         })
         .collect::<Vec<_>>();

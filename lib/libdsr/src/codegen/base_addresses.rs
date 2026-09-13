@@ -63,7 +63,7 @@ impl std::fmt::Debug for BaseAddresses {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Version {
     V1_03_1,
 }
@@ -87,6 +87,18 @@ impl From<Version> for (u32, u32, u32) {
         match v {
             Version::V1_03_1 => (1, 3, 1),
         }
+    }
+}
+
+impl Version {
+    /// Every version the addresses below were generated against, keyed by
+    /// the mapped size of its executable.
+    pub const KNOWN: &'static [(usize, Version)] = &[(0x319b000, Version::V1_03_1)];
+
+    /// The build a module of this size is, or `None` for one we have no
+    /// addresses for.
+    pub fn from_module_size(size: usize) -> Option<Version> {
+        Self::KNOWN.iter().find(|(s, _)| *s == size).map(|(_, v)| *v)
     }
 }
 

@@ -1,8 +1,25 @@
 use std::ops::{BitAnd, BitOr, BitXor, Not};
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use windows::Win32::Foundation::HANDLE;
 use windows::Win32::System::Diagnostics::Debug::{ReadProcessMemory, WriteProcessMemory};
 use windows::Win32::System::Threading::GetCurrentProcess;
+
+/// Master switch for every write this crate makes.
+///
+/// Reads are always safe: a bad chain evaluates to `None`. Writes are not, and
+/// on a game build these addresses were not generated for, a write lands
+/// somewhere arbitrary. Rather than guard each of the several dozen call sites,
+/// the switch lives here, at the one place all of them funnel through.
+static WRITES_ENABLED: AtomicBool = AtomicBool::new(true);
+
+pub fn set_writes_enabled(enabled: bool) {
+    WRITES_ENABLED.store(enabled, Ordering::Relaxed);
+}
+
+pub fn writes_enabled() -> bool {
+    WRITES_ENABLED.load(Ordering::Relaxed)
+}
 
 #[derive(Clone, Debug)]
 pub struct PointerChain<T> {
@@ -67,8 +84,13 @@ impl<T> PointerChain<T> {
     }
 
     /// Evaluates the pointer chain and attempts to write the datum.
-    /// Returns `None` if either the evaluation or the write failed.
+    /// Returns `None` if writes are disabled, or if either the evaluation or
+    /// the write failed.
     pub fn write(&self, mut value: T) -> Option<()> {
+        if !writes_enabled() {
+            return None;
+        }
+
         let ptr = self.eval()?;
         unsafe {
             WriteProcessMemory(
