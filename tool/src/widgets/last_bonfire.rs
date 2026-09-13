@@ -1,20 +1,22 @@
+use libdsr::funcs::BonfireWarp;
 use libdsr::memedit::PointerChain;
 use practice_tool_core::widgets::{scaling_factor, Widget, BUTTON_HEIGHT, BUTTON_WIDTH};
 
-/// Edit the bonfire the game will send you to on the next load.
+/// Set the bonfire you last rested at, and travel to it.
 ///
-/// Paired with quitout this is a warp: set the ID, quit out, load back in. IDs
-/// are the game's own bonfire IDs, e.g. `1022960` for Firelink Shrine and
-/// `1012962` for Undead Burg.
+/// IDs are the game's own bonfire IDs, e.g. `1022960` for Firelink Shrine and
+/// `1012962` for Undead Burg. Setting one alone changes where you wake up after
+/// dying; Warp calls the game's travel routine and takes you there now.
 struct LastBonfire {
     ptr: PointerChain<u32>,
+    warp: BonfireWarp,
     id_input: String,
     status: String,
 }
 
 impl LastBonfire {
-    fn new(ptr: PointerChain<u32>) -> Self {
-        Self { ptr, id_input: String::new(), status: String::new() }
+    fn new(ptr: PointerChain<u32>, warp: BonfireWarp) -> Self {
+        Self { ptr, warp, id_input: String::new(), status: String::new() }
     }
 }
 
@@ -54,12 +56,24 @@ impl Widget for LastBonfire {
         }
         drop(_token);
 
+        // Calling into the game is the one thing here that can take the process
+        // down, so the button is dead unless there is something to call with.
+        let _token = ui.begin_disabled(!self.warp.is_ready());
+        if ui.button_with_size("Warp to bonfire", [button_width, BUTTON_HEIGHT]) {
+            self.status = if self.warp.warp() {
+                String::from("warping")
+            } else {
+                String::from("nothing to warp to")
+            };
+        }
+        drop(_token);
+
         if !self.status.is_empty() {
             ui.text(&self.status);
         }
     }
 }
 
-pub(crate) fn last_bonfire(ptr: PointerChain<u32>) -> Box<dyn Widget> {
-    Box::new(LastBonfire::new(ptr))
+pub(crate) fn last_bonfire(ptr: PointerChain<u32>, warp: BonfireWarp) -> Box<dyn Widget> {
+    Box::new(LastBonfire::new(ptr, warp))
 }
