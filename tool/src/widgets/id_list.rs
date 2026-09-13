@@ -1,6 +1,40 @@
-use imgui::Ui;
+use imgui::{StyleColor, StyleVar, Ui};
 use practice_tool_core::widgets::scaling_factor;
 use serde::Deserialize;
+
+/// Rows a list shows before it starts scrolling.
+pub(crate) const MAX_ROWS: usize = 8;
+
+/// "8 of 67 shown" — says both that the box is hiding something and how much
+/// the search narrowed it. Without this the only clue is a scrollbar.
+pub(crate) fn count_label(ui: &Ui, shown: usize, total: usize) {
+    if shown == total {
+        ui.text_disabled(format!("{total} items"));
+    } else {
+        ui.text_disabled(format!("{shown} of {total}"));
+    }
+}
+
+/// Draws `body` inside a child window sized to `rows`, capped at [`MAX_ROWS`].
+///
+/// The scrollbar is forced on and given some contrast: the default only appears
+/// once content overflows, and is nearly invisible against a dark background,
+/// so a long list looked like a short one. Sizing to content matters for the
+/// same reason — when a full box means "there is more below", a box that is not
+/// full means the opposite.
+pub(crate) fn scrollable_list(ui: &Ui, tag: &str, width: f32, rows: usize, body: impl FnOnce()) {
+    let row_height = ui.text_line_height_with_spacing();
+    let visible = rows.clamp(1, MAX_ROWS);
+    let height = row_height * visible as f32 + 6. * scaling_factor(ui);
+
+    let _size = ui.push_style_var(StyleVar::ScrollbarSize(12.));
+    let _bg = ui.push_style_color(StyleColor::ScrollbarBg, [0.10, 0.11, 0.13, 0.85]);
+    let _grab = ui.push_style_color(StyleColor::ScrollbarGrab, [0.55, 0.57, 0.60, 1.0]);
+    let _grab_hover =
+        ui.push_style_color(StyleColor::ScrollbarGrabHovered, [0.70, 0.72, 0.75, 1.0]);
+
+    ui.child_window(tag).size([width, height]).always_vertical_scrollbar(true).build(body);
+}
 
 /// A searchable list of named IDs, for the widgets whose input would otherwise
 /// be a number you have to know already.
@@ -52,14 +86,12 @@ impl IdList {
         Self { tag, rows, matches: Vec::new(), filter: String::new(), selected: None }
     }
 
-    /// Draws the search box and the list. Returns the ID on the frame a row is
-    /// picked, and `None` otherwise.
-    pub(crate) fn render(&mut self, ui: &Ui, width: f32, height: f32) -> Option<u32> {
+    /// Draws the search box, the count and the list. Returns the ID on the
+    /// frame a row is picked, and `None` otherwise.
+    pub(crate) fn render(&mut self, ui: &Ui, width: f32) -> Option<u32> {
         if self.rows.is_empty() {
             return None;
         }
-
-        let scale = scaling_factor(ui);
 
         {
             let _tok = ui.push_item_width(width);
@@ -79,12 +111,19 @@ impl IdList {
                 .map(|(index, _)| index),
         );
 
+        count_label(ui, self.matches.len(), self.rows.len());
+
         let rows = &self.rows;
         let matches = &self.matches;
         let selected = &mut self.selected;
         let mut picked = None;
 
-        ui.child_window(format!("##{}-list", self.tag)).size([width, height * scale]).build(|| {
+        scrollable_list(ui, &format!("##{}-list", self.tag), width, matches.len(), || {
+            if matches.is_empty() {
+                ui.text_disabled("no matches");
+                return;
+            }
+
             for row in imgui::ListClipper::new(matches.len() as i32).begin(ui).iter() {
                 let Some(&index) = matches.get(row as usize) else {
                     continue;

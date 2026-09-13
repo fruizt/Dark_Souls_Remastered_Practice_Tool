@@ -4,6 +4,8 @@ use practice_tool_core::key::Key;
 use practice_tool_core::widgets::{scaling_factor, Widget, BUTTON_HEIGHT, BUTTON_WIDTH};
 use serde::Deserialize;
 
+use crate::widgets::id_list::{count_label, scrollable_list};
+
 /// How an item can be upgraded, which decides what the panel offers and how the
 /// final ID is composed.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -254,12 +256,19 @@ impl Widget for ItemSpawner {
                     .map(|(index, _)| index),
             );
 
+            count_label(ui, self.matches.len(), self.items.len());
+
             let matches = &self.matches;
             let items = &self.items;
             let selected = &mut self.selected;
             let mut changed = false;
 
-            ui.child_window("##item-list").size([button_width, 200. * scale]).build(|| {
+            scrollable_list(ui, "##item-list", button_width, matches.len(), || {
+                if matches.is_empty() {
+                    ui.text_disabled("no matches");
+                    return;
+                }
+
                 // Every match stays reachable by scrolling. The clipper is what
                 // keeps that affordable: it draws only the rows actually on
                 // screen, so the list can be as long as it likes.

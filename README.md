@@ -187,8 +187,8 @@ widget is click-only.
 | `souls` | `{ souls = 10000, hotkey = "9" }` | Adds to the current total rather than replacing it. |
 | `quitout` | `{ quitout = "p" }` | Quit to the main menu. Writes the game's own menu-kick field, so the save is written normally. |
 | `item_spawner` | `{ item_spawner = "ctrl+u" }` | Searchable item list with infusion, upgrade level and quantity. The hotkey spawns the selected item; the button opens the panel. |
-| `event_flags` | `{ event_flags = true }` | Panel to read, set and clear a story flag by its event ID. |
-| `last_bonfire` | `{ last_bonfire = true }` | Panel to read and set your last bonfire, and warp to it. |
+| `event_flags` | `{ event_flags = true }` | Opens a panel to read, set and clear a story flag, by name or by event ID. |
+| `last_bonfire` | `{ last_bonfire = true }` | Opens a panel to pick a bonfire by name, set it as your last, and warp there. |
 | `character_stats` | `{ character_stats = true }` | Opens the stat editor panel. Can take a hotkey instead of `true`. |
 | `savefile_manager` | `{ savefile_manager = "ctrl+o" }` | Auto-discovers your save directory under `Documents\NBGI\DARK SOULS REMASTERED`. |
 | `label` | `{ label = "Some heading" }` | Static text. An empty string is a spacer. |

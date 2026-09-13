@@ -350,10 +350,14 @@ impl CfgCommand {
             },
             CfgCommand::Souls { amount, hotkey } => souls(amount, chains.souls.clone(), hotkey),
             CfgCommand::Quitout { hotkey } => quitout(chains.quitout.clone(), hotkey.into_option()),
-            CfgCommand::EventFlags { .. } => event_flags(chains.event_flags.clone()),
-            CfgCommand::LastBonfire { .. } => {
-                last_bonfire(chains.last_bonfire.clone(), chains.bonfire_warp.clone())
+            CfgCommand::EventFlags { .. } => {
+                event_flags(chains.event_flags.clone(), settings.display)
             },
+            CfgCommand::LastBonfire { .. } => last_bonfire(
+                chains.last_bonfire.clone(),
+                chains.bonfire_warp.clone(),
+                settings.display,
+            ),
             // CfgCommand::OpenMenu { hotkey, kind } => {
             //     open_menu(kind, chains.travel_ptr, chains.attune_ptr, hotkey)
             // }
