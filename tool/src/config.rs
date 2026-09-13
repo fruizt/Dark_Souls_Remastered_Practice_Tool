@@ -223,8 +223,10 @@ enum CfgCommand {
         enabled: bool,
     },
     LastBonfire {
+        /// `true` for the panel alone, or a key that warps to your last bonfire
+        /// without opening anything.
         #[serde(rename = "last_bonfire")]
-        enabled: bool,
+        hotkey: PlaceholderOption<Key>,
     },
     // Target {
     //     #[serde(rename = "target")]
@@ -315,10 +317,14 @@ impl TryFrom<String> for FlagSpec {
             // "debug_sphere_2" => Ok(FlagSpec::new("Debug sphere 2", |c| &c.debug_sphere_2)),
             "gravity" => Ok(FlagSpec::new("No Gravity", |c| &c.gravity)),
             "collision" => Ok(FlagSpec::new("No Collision", |c| &c.collision)),
-            "warp_menu" => Ok(FlagSpec::new("Warp Menu", |c| &c.bonfire_warp_menu)),
-            // Misspelled in the first release and baked into people's configs;
-            // kept so those keep loading.
-            "wrap_menu" => Ok(FlagSpec::new("Warp Menu", |c| &c.bonfire_warp_menu)),
+            // Forces the game's travel menu open, but the destination list is
+            // built by the bonfire's own Travel action, which this does not run
+            // — so it opens an empty menu that says "no bonfires available".
+            // Kept registered because it is in configs in the wild; the warp
+            // menu worth using is the `last_bonfire` panel.
+            "warp_menu" => Ok(FlagSpec::new("Warp Menu (empty)", |c| &c.bonfire_warp_menu)),
+            // Misspelled in the first release; kept so those configs keep loading.
+            "wrap_menu" => Ok(FlagSpec::new("Warp Menu (empty)", |c| &c.bonfire_warp_menu)),
             e => Err(format!("\"{}\" is not a valid flag specifier", e)),
         }
     }
@@ -356,9 +362,10 @@ impl CfgCommand {
             CfgCommand::EventFlags { .. } => {
                 event_flags(chains.event_flags.clone(), settings.display)
             },
-            CfgCommand::LastBonfire { .. } => last_bonfire(
+            CfgCommand::LastBonfire { hotkey } => last_bonfire(
                 chains.last_bonfire.clone(),
                 chains.bonfire_warp.clone(),
+                hotkey.into_option(),
                 settings.display,
             ),
             // CfgCommand::OpenMenu { hotkey, kind } => {

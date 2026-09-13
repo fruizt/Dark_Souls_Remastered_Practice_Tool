@@ -67,7 +67,7 @@ Everything in this table is implemented and works in-game.
 | **Quitout** | Quit to the main menu on a hotkey, without the pause screen. |
 | **Deathcam** | Free the camera from the player. |
 | **Event flags** | Read and flip story flags by ID — mark a boss dead, a door open, a covenant joined. |
-| **Bonfire warp** | Set a bonfire ID and travel there, through the game's own travel routine. |
+| **Warp menu** | Pick any of 67 bonfires by name and travel there, through the game's own travel routine. No Lordvessel, no bonfire to rest at. |
 | **Item spawner** | Search 866 items by name, pick an infusion and upgrade level, and put them in your inventory. |
 | **World debug flags** | Toggle no-dead, no-hit, no-attack, no-move, AI disable and the consumption flags for every character in the world, or for the player alone. |
 | **Render flags** | Turn drawing of the map, objects, characters, SFX and cutscenes on and off. |
@@ -145,7 +145,7 @@ These come from the shipped `dark_souls_remastered_tool.toml` and are entirely y
 | <kbd>F2</kbd> | Toggle No Gravity |
 | <kbd>F3</kbd> | Toggle No Collision |
 | <kbd>F4</kbd> / <kbd>F5</kbd> / <kbd>F6</kbd> | Toggle rendering of characters / objects / map |
-| <kbd>F9</kbd> | Open the bonfire warp menu |
+| <kbd>F9</kbd> | Warp to your last bonfire |
 | <kbd>Ctrl</kbd>+<kbd>O</kbd> | Open the savefile manager |
 | <kbd>Ctrl</kbd>+<kbd>U</kbd> | Spawn the selected item |
 | <kbd>RShift</kbd>+<kbd>H</kbd> / <kbd>J</kbd> / <kbd>K</kbd> | Save position into slot 1 / 2 / 3 |
@@ -189,7 +189,7 @@ widget is click-only.
 | `quitout` | `{ quitout = "p" }` | Quit to the main menu. Writes the game's own menu-kick field, so the save is written normally. |
 | `item_spawner` | `{ item_spawner = "ctrl+u" }` | Searchable item list with infusion, upgrade level and quantity. The hotkey spawns the selected item; the button opens the panel. |
 | `event_flags` | `{ event_flags = true }` | Opens a panel to read, set and clear a story flag, by name or by event ID. |
-| `last_bonfire` | `{ last_bonfire = true }` | Opens a panel to pick a bonfire by name, set it as your last, and warp there. |
+| `last_bonfire` | `{ last_bonfire = "f9" }` | Opens the warp menu: pick a bonfire by name, then **Warp here** to go, or **Set** to change only where you respawn. The hotkey warps to your last bonfire without opening anything. |
 | `character_stats` | `{ character_stats = true }` | Opens the stat editor panel. Can take a hotkey instead of `true`. |
 | `savefile_manager` | `{ savefile_manager = "ctrl+o" }` | Auto-discovers your save directory under `Documents\NBGI\DARK SOULS REMASTERED`. |
 | `label` | `{ label = "Some heading" }` | Static text. An empty string is a spacer. |
@@ -203,7 +203,12 @@ widget is click-only.
 - *Every character in the world:* `all_no_damage`, `all_no_dead`, `all_no_hit`, `all_no_attack`,
   `all_no_move`, `all_no_stamina`, `all_no_mp`, `all_no_arrow`, `all_no_magic_qty`, `ai_disable`.
 - *Rendering:* `rend_map`, `rend_obj`, `rend_chr`, `rend_sfx`, `rend_cutscene`.
-- *Other:* `deathcam`, `warp_menu` (`wrap_menu` still works — it was the original misspelling).
+- *Other:* `deathcam`.
+
+`warp_menu` (and its original misspelling `wrap_menu`) is still accepted but not recommended. It
+forces the game's own travel menu open, and that menu's destination list is built by the bonfire's
+Travel action — which the flag does not run — so it opens empty and says "No bonfires available for
+warping". The warp menu worth using is the `last_bonfire` panel above.
 
 The `all_*` and `player_*` flags and `all_no_damage` are whole-byte booleans in the game's debug
 flag block, not bits in a character struct — which is why they apply world-wide and survive a
@@ -250,7 +255,7 @@ likely to break on another patch.
 
 | Item | Detail |
 | --- | --- |
-| **Warp menu widget** | The `warp_menu` bitflag forces the travel menu open and works, but the dedicated widget in `tool/src/widgets/warp_menu.rs` is still unwired scaffolding. |
+| **`warp_menu` flag** | Opens the game's travel menu with nothing in it, for the reason described under [Commands](#commands). Superseded by the `last_bonfire` panel; `tool/src/widgets/warp_menu.rs` was scaffolding toward the same dead end. |
 | **Event flags** | Read and write work, and the panel lists the 26 documented boss flags by name, but that is a small slice of the flags the game has. Anything else needs its numeric ID. |
 
 ### Not implemented yet
