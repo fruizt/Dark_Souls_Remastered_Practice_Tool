@@ -70,49 +70,53 @@ impl BonfireWarp {
 
 /// Put an item straight into your inventory.
 ///
-/// Unlike [`BonfireWarp`], this one is not a plain call. The routine takes
-/// eight arguments, four of them on the stack, and the shape of that frame is
-/// not something worth reconstructing from a Rust signature — DSR-Gadget's
-/// injected stub is known to work, so the bytes below are its stub verbatim,
-/// with only the immediates patched. Two quirks come along with it: `r12d` is
-/// loaded with a value the original never patches, and one stack byte is
-/// written from `dil`, which is whatever the thread started with. Both are left
-/// as they are, because "identical to the thing that works" is worth more here
-/// than tidiness.
+/// Unlike [`BonfireWarp`], this one is not a plain call: the routine takes
+/// eight arguments, four of them bytes on the stack, and it branches on all
+/// four.
 ///
-/// The stub clobbers r12, r14 and r15 without saving them, so it must be
-/// entered as a thread rather than called as a function.
+/// The stub below is modelled on the game's own call site at `0x4DD5B5`, which
+/// passes every one of those four as a constant. An earlier version copied
+/// DSR-Gadget's stub instead, which reproduces a call site's *instructions*
+/// without its *frame*: it writes the four bytes at `[rsp+0x20..0x38]` and only
+/// then does `sub rsp, 0x38`, which leaves them 0x38 away from where the callee
+/// reads them. The call then ran with whatever was on the fresh thread's stack,
+/// took the "don't grant it" path, and returned quietly. Allocating the frame
+/// first is the fix.
+///
+/// The stub clobbers r14 and r15 without saving them, so it must be entered as
+/// a thread rather than called as a function.
 #[derive(Debug, Clone)]
 pub struct ItemSpawn {
     game_data_man: usize,
     item_get_fn: usize,
 }
 
+/// 0x48 of frame: 0x20 of shadow space, 0x20 for the four stack arguments, and
+/// 8 more to land the `call` on a 16 byte boundary from a thread entry.
 #[rustfmt::skip]
-const ITEM_SPAWN_STUB: [u8; 0x56] = [
+const ITEM_SPAWN_STUB: [u8; 0x50] = [
+    0x48, 0x83, 0xEC, 0x48,                                           // sub  rsp, 0x48
     0xBA, 0xFE, 0xFE, 0xFE, 0xFE,                                     // mov  edx, category
     0x41, 0xB9, 0xFE, 0xFE, 0xFE, 0xFE,                               // mov  r9d, quantity
     0x41, 0xB8, 0xFE, 0xFE, 0xFE, 0xFE,                               // mov  r8d, item id
-    0x41, 0xBC, 0xFE, 0xFE, 0xFE, 0xFE,                               // mov  r12d, (unpatched)
     0x48, 0xA1, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE,       // mov  rax, [GameDataMan]
-    0xC6, 0x44, 0x24, 0x38, 0x01,                                     // mov  byte [rsp+0x38], 1
-    0x40, 0x88, 0x7C, 0x24, 0x30,                                     // mov  byte [rsp+0x30], dil
-    0xC6, 0x44, 0x24, 0x28, 0x01,                                     // mov  byte [rsp+0x28], 1
-    0x4C, 0x8B, 0x78, 0x10,                                           // mov  r15, [rax+0x10]
     0xC6, 0x44, 0x24, 0x20, 0x01,                                     // mov  byte [rsp+0x20], 1
+    0xC6, 0x44, 0x24, 0x28, 0x01,                                     // mov  byte [rsp+0x28], 1
+    0xC6, 0x44, 0x24, 0x30, 0x00,                                     // mov  byte [rsp+0x30], 0
+    0xC6, 0x44, 0x24, 0x38, 0x01,                                     // mov  byte [rsp+0x38], 1
+    0x4C, 0x8B, 0x78, 0x10,                                           // mov  r15, [rax+0x10]
     0x49, 0x8D, 0x8F, 0x80, 0x02, 0x00, 0x00,                         // lea  rcx, [r15+0x280]
-    0x48, 0x83, 0xEC, 0x38,                                           // sub  rsp, 0x38
     0x49, 0xBE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE,       // mov  r14, ItemGetFn
     0x41, 0xFF, 0xD6,                                                 // call r14
-    0x48, 0x83, 0xC4, 0x38,                                           // add  rsp, 0x38
+    0x48, 0x83, 0xC4, 0x48,                                           // add  rsp, 0x48
     0xC3,                                                             // ret
 ];
 
-const STUB_CATEGORY: usize = 0x01;
-const STUB_QUANTITY: usize = 0x07;
-const STUB_ITEM_ID: usize = 0x0D;
-const STUB_GAME_DATA_MAN: usize = 0x19;
-const STUB_ITEM_GET_FN: usize = 0x46;
+const STUB_CATEGORY: usize = 0x05;
+const STUB_QUANTITY: usize = 0x0B;
+const STUB_ITEM_ID: usize = 0x11;
+const STUB_GAME_DATA_MAN: usize = 0x17;
+const STUB_ITEM_GET_FN: usize = 0x40;
 
 impl ItemSpawn {
     pub fn new(game_data_man: usize, item_get_fn: usize) -> Self {

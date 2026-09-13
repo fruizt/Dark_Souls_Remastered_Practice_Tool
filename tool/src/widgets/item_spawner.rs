@@ -50,6 +50,8 @@ const SPAWNER_TAG: &str = "##item-spawner";
 struct ItemSpawner {
     spawn: ItemSpawn,
     items: Vec<Item>,
+    /// Indices into `items` matching the current filter, rebuilt each frame.
+    matches: Vec<usize>,
     filter: String,
     quantity: String,
     selected: Option<usize>,
@@ -84,6 +86,7 @@ impl ItemSpawner {
         Self {
             spawn,
             items,
+            matches: Vec::new(),
             filter: String::new(),
             quantity: String::from("1"),
             selected: None,
@@ -134,22 +137,34 @@ impl Widget for ItemSpawner {
 
             let needle = self.filter.trim().to_lowercase();
 
-            ui.child_window("##item-list").size([button_width, 200. * scale]).build(|| {
-                let matches = self
-                    .items
+            self.matches.clear();
+            self.matches.extend(
+                self.items
                     .iter()
                     .enumerate()
-                    .filter(|(_, item)| needle.is_empty() || item.search.contains(&needle));
+                    .filter(|(_, item)| needle.is_empty() || item.search.contains(&needle))
+                    .map(|(index, _)| index),
+            );
 
-                // The full list is over a thousand entries; drawing all of them
-                // every frame for an empty search is wasted work.
-                for (index, item) in matches.take(256) {
-                    if ui
-                        .selectable_config(&item.label)
-                        .selected(self.selected == Some(index))
-                        .build()
+            let matches = &self.matches;
+            let items = &self.items;
+            let selected = &mut self.selected;
+
+            ui.child_window("##item-list").size([button_width, 200. * scale]).build(|| {
+                // Every match stays reachable by scrolling. The clipper is what
+                // keeps that affordable: it draws only the rows actually on screen,
+                // so the list can be as long as it likes.
+                for row in imgui::ListClipper::new(matches.len() as i32).begin(ui).iter() {
+                    let Some(&index) = matches.get(row as usize) else {
+                        continue;
+                    };
+                    let Some(item) = items.get(index) else {
+                        continue;
+                    };
+
+                    if ui.selectable_config(&item.label).selected(*selected == Some(index)).build()
                     {
-                        self.selected = Some(index);
+                        *selected = Some(index);
                     }
                 }
             });
