@@ -59,8 +59,8 @@ indicators = [
   { indicator = "igt", enabled = true },
   { indicator = "position", enabled = false },
   { indicator = "position_change", enabled = false },
-  { indicator = "animation", enabled = false },
-  { indicator = "fps", enabled = false },
+  { indicator = "animation", enabled = true },
+  { indicator = "fps", enabled = true },
   { indicator = "framecount", enabled = false },
   { indicator = "imgui_debug", enabled = false }
 ]

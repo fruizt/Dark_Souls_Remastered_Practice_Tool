@@ -222,6 +222,8 @@ indicators = [
   { indicator = "igt", enabled = true },
   { indicator = "position", enabled = false },
   { indicator = "position_change", enabled = false },
+  { indicator = "fps", enabled = true },
+  { indicator = "animation", enabled = true },
   { indicator = "framecount", enabled = false },
   { indicator = "imgui_debug", enabled = false },
 ]
