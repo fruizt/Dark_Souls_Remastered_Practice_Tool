@@ -7,10 +7,10 @@ It injects a DLL into the running game, hooks the DirectX 11 present chain, and 
 warp to saved coordinates, edit your character's stats, change game speed, and read out IGT and
 position live — the things you actually need when you are grinding a route or drilling a boss.
 
-> **Status: working prototype.** The overlay, the hotkey system, and the feature set listed under
-> [Features](#features) are implemented and tested in-game on patch **1.03.1**. Several features are
-> still stubbed out — see [Status & roadmap](#status--roadmap) for an honest breakdown of what
-> works, what is partial, and what is not there yet.
+> **Status: works, on patch 1.03.1.** Every feature in the table below has been used against a
+> running game, not just compiled — including the two that call into the game's own code. The tool
+> does **not** yet detect which patch it is attached to, so on any other build it will read and
+> write meaningless addresses; see [Status & roadmap](#status--roadmap).
 
 ![The overlay open in-game, showing the full widget list](docs/overlay.png)
 
@@ -243,13 +243,16 @@ intended surface, including commands that are not implemented yet. It will not l
 
 ### Working
 
-The entire [Features](#features) table, on game version **1.03.1**.
+The entire [Features](#features) table, verified in-game on version **1.03.1**. That includes the
+two features that call game code — bonfire warp and the item spawner — which are the ones most
+likely to break on another patch.
 
 ### Partial / known warts
 
 | Item | Detail |
 | --- | --- |
-| **Version detection** | `libdsr::version::get_version()` hardcodes `V1_03_1` instead of reading the PE version at runtime, so the tool will happily attach to another patch and read garbage addresses. The AOB scanner already handles multiple versions; only the runtime lookup is stubbed. |
+| **Version detection** | `libdsr::version::get_version()` returns `V1_03_1` unconditionally instead of reading the PE version at runtime, so the tool attaches to any patch and writes to addresses that mean nothing there. The AOB scanner already handles multiple versions; only the runtime lookup is stubbed. This is the most important thing left. |
+| **Event flags** | Read and write work, and the panel lists the 26 documented boss flags by name, but that is a small slice of the flags the game has. Anything else needs its numeric ID. |
 | **Warp menu** | The `wrap_menu` bitflag forces the travel menu open, but the dedicated `warp_menu` widget (`tool/src/widgets/warp_menu.rs`) is not wired into the config and is not functional. |
 | **`show_console`** | Parsed from the config and then never read — the console is always allocated. |
 | **`fps` / `animation` indicators** | Accepted by the config parser but not rendered. |
@@ -257,19 +260,20 @@ The entire [Features](#features) table, on game version **1.03.1**.
 
 ### Not implemented yet
 
-Scaffolding exists for these — they are commented out in `tool/src/config.rs` and present in
-`dark_souls_remastered_tool_complete.toml`:
-
-- **Item spawner** — `tool/src/widgets/item_ids.json` is already populated with the full item tree
-  but nothing consumes it yet.
 - **Open menu (travel / attune)** — `tool/src/widgets/open_menu.rs` calls into the game's menu
-  functions directly. Currently crashes the game; the AOB signatures for the menu functions need
-  revisiting.
-- **Target lock info**, **one shot**, **event disable**. (**Ember** and **infinite focus** are DS3
-  mechanics with no Dark Souls equivalent and will not be added.)
-- **Debug draw flags** — hurtboxes, collision mesh, debug spheres, IK foot rays. Remastered does
-  not appear to expose the render path DS3 uses for these.
-- **Multi-version support** — see version detection above.
+  functions directly. Currently crashes the game; the AOB signatures need revisiting.
+- **Target lock info**, **one shot**, **event disable** — real gaps against the DS3 tool, each
+  needing its own reverse engineering.
+- **Multi-version support** — see version detection above. Deferred deliberately: no leaderboard
+  rule pins a patch and the community's own tools target current retail, so this is worth
+  confirming with runners before building for five builds.
+- **Item and flag data from the game's own params** — the bundled lists come from DSR-Gadget's
+  resources. Reading `EquipParam*` and the message files directly would be correct for any patch
+  and regenerable, but it is a sub-project of its own.
+
+Closed as not applicable: **ember** and **infinite focus** are DS3 mechanics with no Dark Souls
+equivalent, and DS3's **hurtbox / debug draw** flags come from a render path Remastered does not
+appear to expose.
 
 ---
 
@@ -376,6 +380,14 @@ binary exactly — that is the expected result on an unchanged game version.
 - `pointers.rs` — the actual pointer chains, written with the `pointer_chain!` and `bitflag!` macros.
   This is where the reverse-engineering work lives. `pointers_difference.txt` in the repo root is a
   working note comparing the No-Death flag's chain in Remastered against the known DS3 one.
+- `event_flags.rs` — story flags. An eight digit flag ID (`G AAA S NNN`) decodes into a group base,
+  an area 0x500 apart, a section of 128 bytes and a bit within a word; unknown group or area codes
+  resolve to `None` rather than poking an arbitrary address.
+- `funcs.rs` — the two places the tool calls the game instead of reading it: bonfire warp and item
+  spawn. This is the only unrecoverable corner of the codebase, so it states its rules at the top
+  and follows them — resolve every pointer first and refuse on `None`, and run the call on its own
+  thread rather than on the render thread. The item spawn is a patched machine-code stub, because
+  the routine takes eight arguments and the frame is easier to build by hand than to describe.
 - `codegen/base_addresses.rs` — generated by `xtask`. One `BaseAddresses` constant per game version,
   as offsets from the module base.
 
@@ -390,7 +402,12 @@ binary exactly — that is the expected result on an unchanged game version.
 - `config.rs` — the TOML schema. Each `CfgCommand` variant maps to one `Box<dyn Widget>`, so adding a
   feature means adding a variant, a match arm, and a widget module.
 - `widgets/` — thin adapters binding `practice-tool-core`'s generic widget traits to DSR's concrete
-  pointer chains.
+  pointer chains, plus the few widgets drawn directly with imgui: the item spawner, event flags and
+  the bonfire panel.
+- `widgets/*.json` — bundled data. `item_ids.json` carries 866 items with their category, stack
+  limit and upgrade type; `event_flag_ids.json` and `bonfire_ids.json` name the flags and bonfires
+  the panels list. All three are generated from DSR-Gadget's resources and covered by tests, since
+  a wrong ID is the kind of bug that costs a play session to notice.
 
 **`xtask`** — the code generator, run as `cargo xtask`.
 
