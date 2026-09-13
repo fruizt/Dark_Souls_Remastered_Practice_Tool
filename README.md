@@ -68,6 +68,7 @@ Everything in this table is implemented and works in-game.
 | **Deathcam** | Free the camera from the player. |
 | **Event flags** | Read and flip story flags by ID — mark a boss dead, a door open, a covenant joined. |
 | **Bonfire warp** | Set a bonfire ID and travel there, through the game's own travel routine. |
+| **Item spawner** | Search 1100+ items by name and put any of them in your inventory. |
 | **World debug flags** | Toggle no-dead, no-hit, no-attack, no-move, AI disable and the consumption flags for every character in the world, or for the player alone. |
 | **Render flags** | Turn drawing of the map, objects, characters, SFX and cutscenes on and off. |
 | **Infinite Stamina** | Stamina never drains. |
@@ -145,6 +146,7 @@ These come from the shipped `dark_souls_remastered_tool.toml` and are entirely y
 | <kbd>F4</kbd> / <kbd>F5</kbd> / <kbd>F6</kbd> | Toggle rendering of characters / objects / map |
 | <kbd>F9</kbd> | Open the bonfire warp menu |
 | <kbd>Ctrl</kbd>+<kbd>O</kbd> | Open the savefile manager |
+| <kbd>Ctrl</kbd>+<kbd>U</kbd> | Spawn the selected item |
 | <kbd>RShift</kbd>+<kbd>H</kbd> / <kbd>J</kbd> / <kbd>K</kbd> | Save position into slot 1 / 2 / 3 |
 | <kbd>H</kbd> / <kbd>J</kbd> / <kbd>K</kbd> | Warp to saved position 1 / 2 / 3 |
 | <kbd>[</kbd> / <kbd>]</kbd> | Nudge position up / down |
@@ -184,6 +186,7 @@ widget is click-only.
 | `cycle_speed` | `{ cycle_speed = [0.5, 1.0, 2.0], hotkey = "8" }` | Cycles in ascending order, wrapping around. |
 | `souls` | `{ souls = 10000, hotkey = "9" }` | Adds to the current total rather than replacing it. |
 | `quitout` | `{ quitout = "p" }` | Quit to the main menu. Writes the game's own menu-kick field, so the save is written normally. |
+| `item_spawner` | `{ item_spawner = "ctrl+u" }` | Searchable item list. The hotkey spawns the selected item; the button opens the panel. |
 | `event_flags` | `{ event_flags = true }` | Panel to read, set and clear a story flag by its event ID. |
 | `last_bonfire` | `{ last_bonfire = true }` | Panel to read and set your last bonfire, and warp to it. |
 | `character_stats` | `{ character_stats = true }` | Opens the stat editor panel. Can take a hotkey instead of `true`. |
@@ -266,9 +269,6 @@ Scaffolding exists for these — they are commented out in `tool/src/config.rs` 
   mechanics with no Dark Souls equivalent and will not be added.)
 - **Debug draw flags** — hurtboxes, collision mesh, debug spheres, IK foot rays. Remastered does
   not appear to expose the render path DS3 uses for these.
-- **Item spawner** — needs the tool to call a game function, the riskiest class of change here. The
-  item list is already in `tool/src/widgets/item_ids.json`; the address is scanned; nothing calls it
-  yet.
 - **Multi-version support** — see version detection above.
 
 ---

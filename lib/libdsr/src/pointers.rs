@@ -5,7 +5,7 @@ use windows::Win32::System::LibraryLoader::GetModuleHandleA;
 
 use crate::codegen::base_addresses::Version;
 use crate::event_flags::EventFlags;
-use crate::funcs::BonfireWarp;
+use crate::funcs::{BonfireWarp, ItemSpawn};
 use crate::memedit::{Bitflag, *};
 use crate::prelude::base_addresses::BaseAddresses;
 use crate::version::VERSION;
@@ -67,6 +67,7 @@ pub struct PointerChains {
     /// sends you to it.
     pub last_bonfire: PointerChain<u32>,
     pub bonfire_warp: BonfireWarp,
+    pub item_spawn: ItemSpawn,
 
     // The rest of the ChrDbg block. Every entry is a whole-byte boolean, so each of
     // these is masked with `0b1` rather than a real bit.
@@ -104,6 +105,7 @@ impl From<BaseAddresses> for PointerChains {
             event_flag_man,
             chr_class_warp,
             bonfire_warp_fn,
+            item_get_fn,
             ..
         } = value;
 
@@ -145,6 +147,7 @@ impl From<BaseAddresses> for PointerChains {
             // 0xB24 on 1.01.x; the warp block gained 0x10 in 1.01.2.
             last_bonfire: pointer_chain!(chr_class_warp, 0xb34),
             bonfire_warp: BonfireWarp::new(game_data_man, bonfire_warp_fn),
+            item_spawn: ItemSpawn::new(game_data_man, item_get_fn),
 
             player_no_dead: bitflag!(0b1; chr_dbg + 0x0),
             player_exterminate: bitflag!(0b1; chr_dbg + 0x1),

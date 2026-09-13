@@ -11,6 +11,7 @@ use crate::widgets::cycle_speed::cycle_speed;
 use crate::widgets::event_flags::event_flags;
 use crate::widgets::flag::flag_widget;
 use crate::widgets::group::group;
+use crate::widgets::item_spawner::item_spawner;
 use crate::widgets::label::label_widget;
 use crate::widgets::last_bonfire::last_bonfire;
 use crate::widgets::nudge_pos::nudge_position;
@@ -178,10 +179,10 @@ enum CfgCommand {
         #[serde(rename = "savefile_manager")]
         hotkey_load: PlaceholderOption<Key>,
     },
-    // ItemSpawner {
-    //     #[serde(rename = "item_spawner")]
-    //     hotkey_load: PlaceholderOption<Key>,
-    // },
+    ItemSpawner {
+        #[serde(rename = "item_spawner")]
+        hotkey_load: PlaceholderOption<Key>,
+    },
     Flag {
         flag: FlagSpec,
         hotkey: Option<Key>,
@@ -330,13 +331,9 @@ impl CfgCommand {
             CfgCommand::SavefileManager { hotkey_load: key_load } => {
                 savefile_manager(key_load.into_option(), settings.display)
             },
-            // CfgCommand::ItemSpawner { hotkey_load: key_load } => Box::new(ItemSpawner::new(
-            //     chains.spawn_item_func_ptr as usize,
-            //     chains.map_item_man as usize,
-            //     chains.gravity.clone(),
-            //     key_load.into_option(),
-            //     settings.display,
-            // )),
+            CfgCommand::ItemSpawner { hotkey_load: key_load } => {
+                item_spawner(chains.item_spawn.clone(), key_load.into_option(), settings.display)
+            },
             CfgCommand::Position { position, save } => {
                 save_position(chains.position.clone(), position.into_option(), save)
             },

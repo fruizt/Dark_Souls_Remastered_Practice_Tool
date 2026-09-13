@@ -67,3 +67,118 @@ impl BonfireWarp {
         true
     }
 }
+
+/// Put an item straight into your inventory.
+///
+/// Unlike [`BonfireWarp`], this one is not a plain call. The routine takes
+/// eight arguments, four of them on the stack, and the shape of that frame is
+/// not something worth reconstructing from a Rust signature — DSR-Gadget's
+/// injected stub is known to work, so the bytes below are its stub verbatim,
+/// with only the immediates patched. Two quirks come along with it: `r12d` is
+/// loaded with a value the original never patches, and one stack byte is
+/// written from `dil`, which is whatever the thread started with. Both are left
+/// as they are, because "identical to the thing that works" is worth more here
+/// than tidiness.
+///
+/// The stub clobbers r12, r14 and r15 without saving them, so it must be
+/// entered as a thread rather than called as a function.
+#[derive(Debug, Clone)]
+pub struct ItemSpawn {
+    game_data_man: usize,
+    item_get_fn: usize,
+}
+
+#[rustfmt::skip]
+const ITEM_SPAWN_STUB: [u8; 0x56] = [
+    0xBA, 0xFE, 0xFE, 0xFE, 0xFE,                                     // mov  edx, category
+    0x41, 0xB9, 0xFE, 0xFE, 0xFE, 0xFE,                               // mov  r9d, quantity
+    0x41, 0xB8, 0xFE, 0xFE, 0xFE, 0xFE,                               // mov  r8d, item id
+    0x41, 0xBC, 0xFE, 0xFE, 0xFE, 0xFE,                               // mov  r12d, (unpatched)
+    0x48, 0xA1, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE,       // mov  rax, [GameDataMan]
+    0xC6, 0x44, 0x24, 0x38, 0x01,                                     // mov  byte [rsp+0x38], 1
+    0x40, 0x88, 0x7C, 0x24, 0x30,                                     // mov  byte [rsp+0x30], dil
+    0xC6, 0x44, 0x24, 0x28, 0x01,                                     // mov  byte [rsp+0x28], 1
+    0x4C, 0x8B, 0x78, 0x10,                                           // mov  r15, [rax+0x10]
+    0xC6, 0x44, 0x24, 0x20, 0x01,                                     // mov  byte [rsp+0x20], 1
+    0x49, 0x8D, 0x8F, 0x80, 0x02, 0x00, 0x00,                         // lea  rcx, [r15+0x280]
+    0x48, 0x83, 0xEC, 0x38,                                           // sub  rsp, 0x38
+    0x49, 0xBE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE, 0xFE,       // mov  r14, ItemGetFn
+    0x41, 0xFF, 0xD6,                                                 // call r14
+    0x48, 0x83, 0xC4, 0x38,                                           // add  rsp, 0x38
+    0xC3,                                                             // ret
+];
+
+const STUB_CATEGORY: usize = 0x01;
+const STUB_QUANTITY: usize = 0x07;
+const STUB_ITEM_ID: usize = 0x0D;
+const STUB_GAME_DATA_MAN: usize = 0x19;
+const STUB_ITEM_GET_FN: usize = 0x46;
+
+impl ItemSpawn {
+    pub fn new(game_data_man: usize, item_get_fn: usize) -> Self {
+        Self { game_data_man, item_get_fn }
+    }
+
+    pub fn is_ready(&self) -> bool {
+        PointerChain::<usize>::new(&[self.game_data_man]).read().is_some_and(|p| p != 0)
+    }
+
+    /// `category` is the item's high nibble — 0x00000000 weapons, 0x10000000
+    /// armour, 0x20000000 rings, 0x40000000 goods — and `item_id` the rest of
+    /// it.
+    ///
+    /// Returns false without calling anything if there is no character loaded.
+    pub fn spawn(&self, category: u32, item_id: u32, quantity: u32) -> bool {
+        if !self.is_ready() {
+            return false;
+        }
+
+        let mut stub = ITEM_SPAWN_STUB;
+        stub[STUB_CATEGORY..][..4].copy_from_slice(&category.to_le_bytes());
+        stub[STUB_QUANTITY..][..4].copy_from_slice(&quantity.to_le_bytes());
+        stub[STUB_ITEM_ID..][..4].copy_from_slice(&item_id.to_le_bytes());
+        stub[STUB_GAME_DATA_MAN..][..8].copy_from_slice(&(self.game_data_man as u64).to_le_bytes());
+        stub[STUB_ITEM_GET_FN..][..8].copy_from_slice(&(self.item_get_fn as u64).to_le_bytes());
+
+        thread::spawn(move || unsafe { run_stub(&stub) });
+
+        true
+    }
+}
+
+/// Copy `stub` into executable memory, run it as a thread, and clean up after
+/// it.
+///
+/// # Safety
+///
+/// `stub` must be a complete, correctly patched function that ends in `ret`.
+unsafe fn run_stub(stub: &[u8]) {
+    use windows::Win32::Foundation::CloseHandle;
+    use windows::Win32::System::Memory::{
+        VirtualAlloc, VirtualFree, MEM_COMMIT, MEM_RELEASE, MEM_RESERVE, PAGE_EXECUTE_READWRITE,
+    };
+    use windows::Win32::System::Threading::{
+        CreateThread, WaitForSingleObject, THREAD_CREATION_FLAGS,
+    };
+
+    let mem = VirtualAlloc(None, stub.len(), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+    if mem.is_null() {
+        return;
+    }
+
+    std::ptr::copy_nonoverlapping(stub.as_ptr(), mem as *mut u8, stub.len());
+
+    let entry: extern "system" fn(*mut std::ffi::c_void) -> u32 = std::mem::transmute(mem);
+
+    match CreateThread(None, 0, Some(entry), None, THREAD_CREATION_FLAGS(0), None) {
+        Ok(thread) => {
+            // Bounded, so a call that never returns leaks a page instead of
+            // wedging this thread forever.
+            WaitForSingleObject(thread, 5000);
+            CloseHandle(thread).ok();
+        },
+        Err(e) => log::error!("Couldn't run item spawn stub: {e}"),
+    }
+
+    VirtualFree(mem, 0, MEM_RELEASE).ok();
+}
