@@ -315,6 +315,9 @@ impl TryFrom<String> for FlagSpec {
             // "debug_sphere_2" => Ok(FlagSpec::new("Debug sphere 2", |c| &c.debug_sphere_2)),
             "gravity" => Ok(FlagSpec::new("No Gravity", |c| &c.gravity)),
             "collision" => Ok(FlagSpec::new("No Collision", |c| &c.collision)),
+            "warp_menu" => Ok(FlagSpec::new("Warp Menu", |c| &c.bonfire_warp_menu)),
+            // Misspelled in the first release and baked into people's configs;
+            // kept so those keep loading.
             "wrap_menu" => Ok(FlagSpec::new("Warp Menu", |c| &c.bonfire_warp_menu)),
             e => Err(format!("\"{}\" is not a valid flag specifier", e)),
         }

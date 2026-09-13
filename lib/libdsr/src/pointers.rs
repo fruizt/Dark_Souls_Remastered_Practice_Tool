@@ -53,6 +53,8 @@ pub struct PointerChains {
     pub gravity: Bitflag<u8>,
     pub collision: Bitflag<u8>,
     pub speed: PointerChain<f32>,
+    /// The animation the player is currently playing, for the indicator.
+    pub animation: PointerChain<i32>,
     pub character_stats: PointerChain<CharacterStats>,
     pub souls: PointerChain<u32>,
     pub cursor_show: Bitflag<u8>,
@@ -129,6 +131,7 @@ impl From<BaseAddresses> for PointerChains {
             gravity: bitflag!(0b1000000; world_chr_man, 0x68, 0x2a5),
             collision: bitflag!(0b1000; world_chr_man, 0x68,0x68, 0x104),
             speed: pointer_chain!(world_chr_man, 0x68, 0x68, 0x18, 0xa8),
+            animation: pointer_chain!(world_chr_man, 0x68, 0x68, 0x48, 0x80),
             character_stats: pointer_chain!(game_data_man, 0x10, 0x40),
             souls: pointer_chain!(game_data_man, 0x10, 0x94),
             cursor_show: bitflag!(0b1; menu_man as _, 0xa8),

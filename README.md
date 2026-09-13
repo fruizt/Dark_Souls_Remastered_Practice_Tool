@@ -203,15 +203,11 @@ widget is click-only.
 - *Every character in the world:* `all_no_damage`, `all_no_dead`, `all_no_hit`, `all_no_attack`,
   `all_no_move`, `all_no_stamina`, `all_no_mp`, `all_no_arrow`, `all_no_magic_qty`, `ai_disable`.
 - *Rendering:* `rend_map`, `rend_obj`, `rend_chr`, `rend_sfx`, `rend_cutscene`.
-- *Other:* `deathcam`, `wrap_menu`.
+- *Other:* `deathcam`, `warp_menu` (`wrap_menu` still works — it was the original misspelling).
 
 The `all_*` and `player_*` flags and `all_no_damage` are whole-byte booleans in the game's debug
 flag block, not bits in a character struct — which is why they apply world-wide and survive a
 reload.
-
-> `wrap_menu` is a typo for *warp* menu that is currently baked into the config key. It is left
-> as-is so existing configs keep working; renaming it with a backwards-compatible alias is on the
-> roadmap.
 
 ### Settings
 
@@ -220,7 +216,7 @@ reload.
 log_level = "DEBUG"     # TRACE | DEBUG | INFO | WARN | ERROR | OFF
 display = "0"           # open/close the overlay
 hide = "rshift+0"       # hide it entirely (optional)
-show_console = true     # currently a no-op, see roadmap
+show_console = true     # allocate a console window for logs
 indicators = [
   { indicator = "game_version", enabled = true },
   { indicator = "igt", enabled = true },
@@ -233,7 +229,7 @@ indicators = [
 
 Indicators render in the order you list them, and can be toggled at runtime from the **Indicators**
 button without editing the file. Valid names: `game_version`, `igt`, `position`, `position_change`,
-`framecount`, `imgui_debug`, plus `fps` and `animation`, which parse but do not yet draw anything.
+`fps`, `animation`, `framecount` and `imgui_debug`.
 
 `dark_souls_remastered_tool_complete.toml` in the repo root is a **target** config showing the full
 intended surface, including commands that are not implemented yet. It will not load as-is.
@@ -252,11 +248,8 @@ likely to break on another patch.
 
 | Item | Detail |
 | --- | --- |
+| **Warp menu widget** | The `warp_menu` bitflag forces the travel menu open and works, but the dedicated widget in `tool/src/widgets/warp_menu.rs` is still unwired scaffolding. |
 | **Event flags** | Read and write work, and the panel lists the 26 documented boss flags by name, but that is a small slice of the flags the game has. Anything else needs its numeric ID. |
-| **Warp menu** | The `wrap_menu` bitflag forces the travel menu open, but the dedicated `warp_menu` widget (`tool/src/widgets/warp_menu.rs`) is not wired into the config and is not functional. |
-| **`show_console`** | Parsed from the config and then never read — the console is always allocated. |
-| **`fps` / `animation` indicators** | Accepted by the config parser but not rendered. |
-| **`wrap_menu` naming** | Should be `warp_menu`, with the old spelling kept as a deprecated alias. |
 
 ### Not implemented yet
 

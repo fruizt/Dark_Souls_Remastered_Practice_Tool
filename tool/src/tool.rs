@@ -39,11 +39,12 @@ pub(crate) struct Tool {
 
     framecount: u32,
     framecount_buf: String,
+    fps_buf: String,
+    animation_buf: String,
 }
 
 impl Tool {
     pub fn new() -> Self {
-        hudhook::alloc_console().ok();
         log_panics::init();
 
         fn load_config() -> Result<Config, String> {
@@ -64,6 +65,12 @@ impl Tool {
             Ok(config) => (config, None),
             Err(e) => (Config::default(), Some(e)),
         };
+
+        // After the config, not before it, so `show_console = false` can actually
+        // prevent the window rather than close one that already flashed up.
+        if config.settings.show_console {
+            hudhook::alloc_console().ok();
+        }
 
         info!("Config {:?}", config);
 
@@ -180,6 +187,8 @@ impl Tool {
             igt_buf: Default::default(),
             framecount: 0,
             framecount_buf: Default::default(),
+            fps_buf: Default::default(),
+            animation_buf: Default::default(),
         }
     }
 
@@ -411,10 +420,22 @@ impl Tool {
                             write!(self.framecount_buf, "Frame count {0}", self.framecount,).ok();
                             ui.text(&self.framecount_buf);
                         },
+                        IndicatorType::Fps => {
+                            self.fps_buf.clear();
+                            write!(self.fps_buf, "FPS {:.0}", ui.io().framerate).ok();
+                            ui.text(&self.fps_buf);
+                        },
+                        IndicatorType::Animation => {
+                            self.animation_buf.clear();
+                            match self.pointers.animation.read() {
+                                Some(anim) => write!(self.animation_buf, "Anim {anim}").ok(),
+                                None => write!(self.animation_buf, "Anim --").ok(),
+                            };
+                            ui.text(&self.animation_buf);
+                        },
                         IndicatorType::ImguiDebug => {
                             imgui_debug(ui);
                         },
-                        _ => {},
                     }
                 }
 
