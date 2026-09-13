@@ -49,7 +49,16 @@ pub static VERSION_STATE: Lazy<VersionState> = Lazy::new(|| {
     let state = detect();
 
     match state {
-        VersionState::Supported(_) => {},
+        // Logged on the way through, not just on failure: when a future patch
+        // breaks something, the first question is which build the tool thought
+        // it was on, and the log should already answer it.
+        VersionState::Supported(version) => {
+            let (maj, min, patch) = version.into();
+            log::info!(
+                "Detected game version {maj}.{min:02}.{patch} (module {:#x})",
+                module_size().unwrap_or(0)
+            );
+        },
         VersionState::Unsupported { size_of_image } => {
             log::error!(
                 "Unsupported game version: module is {size_of_image:#x} bytes, which matches none \
