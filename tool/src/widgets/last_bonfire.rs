@@ -4,7 +4,8 @@ use practice_tool_core::widgets::{scaling_factor, Widget, BUTTON_HEIGHT, BUTTON_
 /// Edit the bonfire the game will send you to on the next load.
 ///
 /// Paired with quitout this is a warp: set the ID, quit out, load back in. IDs
-/// are the game's own bonfire entity IDs, e.g. `1512960` for Firelink Shrine.
+/// are the game's own bonfire IDs, e.g. `1022960` for Firelink Shrine and
+/// `1012962` for Undead Burg.
 struct LastBonfire {
     ptr: PointerChain<u32>,
     id_input: String,

@@ -5,7 +5,9 @@ use practice_tool_core::widgets::{scaling_factor, Widget, BUTTON_HEIGHT, BUTTON_
 ///
 /// Useful for putting a save into a given route state: mark a boss dead, a door
 /// opened, a covenant joined. The ID is the same one the game's event scripts
-/// use, e.g. `11810000` for Gwyn.
+/// use. Main boss kills are single digit flags -- `16` is Asylum Demon, `15`
+/// Gwyn, `3` the Bell Gargoyles -- while the rest are eight digit, e.g.
+/// `11010901` for Taurus Demon.
 struct EventFlagsWidget {
     flags: EventFlagsInner,
     id_input: String,

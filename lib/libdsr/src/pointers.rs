@@ -116,7 +116,12 @@ impl From<BaseAddresses> for PointerChains {
             no_death: bitflag!(0b100000; world_chr_man, 0x68, 0x524),
             inf_stamina: bitflag!(0b100; world_chr_man, 0x68, 0x525),
             inf_consumables: bitflag!(0b1; world_chr_man, 0x68, 0x527),
-            gravity: bitflag!(0b1000000; world_chr_man, 0x68, 0x245),
+            // ChrFlags1 is at 0x2A4 on this build (0x284 plus the 0x20 the struct
+            // gained in 1.03), so NoGravity's 0x4000 is bit 6 of the byte at 0x2A5.
+            // The 0x245 this used to read is not a flag at all: nothing in the binary
+            // tests a single bit anywhere in 0x244..0x247, which is why the toggle
+            // appeared to do nothing.
+            gravity: bitflag!(0b1000000; world_chr_man, 0x68, 0x2a5),
             collision: bitflag!(0b1000; world_chr_man, 0x68,0x68, 0x104),
             speed: pointer_chain!(world_chr_man, 0x68, 0x68, 0x18, 0xa8),
             character_stats: pointer_chain!(game_data_man, 0x10, 0x40),
