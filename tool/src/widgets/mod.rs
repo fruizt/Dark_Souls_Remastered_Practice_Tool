@@ -3,6 +3,7 @@ pub(crate) mod cycle_speed;
 pub(crate) mod event_flags;
 pub(crate) mod flag;
 pub(crate) mod group;
+pub(crate) mod id_list;
 pub(crate) mod item_spawner;
 pub(crate) mod label;
 pub(crate) mod last_bonfire;

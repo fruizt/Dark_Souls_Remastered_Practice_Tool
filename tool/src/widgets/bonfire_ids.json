@@ -1,0 +1,270 @@
+[
+ {
+  "id": "1602950",
+  "desc": "Abyss (Bonfire)"
+ },
+ {
+  "id": "1510980",
+  "desc": "Anor Londo (Entrance)"
+ },
+ {
+  "id": "1512962",
+  "desc": "Anor Londo (Gwyndolin Bonfire)"
+ },
+ {
+  "id": "1512950",
+  "desc": "Anor Londo (Gwynevere Bonfire)"
+ },
+ {
+  "id": "1512961",
+  "desc": "Anor Londo (Interior Bonfire)"
+ },
+ {
+  "id": "1512960",
+  "desc": "Anor Londo (Lady of the Darkling Bonfire)"
+ },
+ {
+  "id": "1322961",
+  "desc": "Ash Lake (Bonfire #1)"
+ },
+ {
+  "id": "1322960",
+  "desc": "Ash Lake (Bonfire #2)"
+ },
+ {
+  "id": "1402962",
+  "desc": "Blighttown (Bridge Bonfire)"
+ },
+ {
+  "id": "1402963",
+  "desc": "Blighttown (Entrance)"
+ },
+ {
+  "id": "1400980",
+  "desc": "Blighttown (Entrance, repeat)"
+ },
+ {
+  "id": "1402961",
+  "desc": "Blighttown (Swamp Bonfire)"
+ },
+ {
+  "id": "1212950",
+  "desc": "Chasm of the Abyss (Manus)"
+ },
+ {
+  "id": "1702950",
+  "desc": "Crystal Cave (Seath)"
+ },
+ {
+  "id": "1602961",
+  "desc": "Darkroot Basin (Bonfire)"
+ },
+ {
+  "id": "1202961",
+  "desc": "Darkroot Garden (Bonfire)"
+ },
+ {
+  "id": "1412961",
+  "desc": "Demon Ruins (Bonfire #1)"
+ },
+ {
+  "id": "1412962",
+  "desc": "Demon Ruins (Bonfire #2)"
+ },
+ {
+  "id": "1412963",
+  "desc": "Demon Ruins (Bonfire #3)"
+ },
+ {
+  "id": "1002960",
+  "desc": "Depths (Bonfire)"
+ },
+ {
+  "id": "1002900",
+  "desc": "Depths (Entrance)"
+ },
+ {
+  "id": "1002950",
+  "desc": "Depths (Gaping Dragon's Room)"
+ },
+ {
+  "id": "1802960",
+  "desc": "Firelink Altar"
+ },
+ {
+  "id": "1022960",
+  "desc": "Firelink Shrine (Bonfire)"
+ },
+ {
+  "id": "1020980",
+  "desc": "Firelink Shrine (Bonfire, repeat)"
+ },
+ {
+  "id": "1322962",
+  "desc": "Great Hollow (Bonfire)"
+ },
+ {
+  "id": "1320980",
+  "desc": "Great Hollow (Bonfire, repeat)"
+ },
+ {
+  "id": "1802961",
+  "desc": "Kiln of the First Flame (Entrance)"
+ },
+ {
+  "id": "1802130",
+  "desc": "Kiln of the First Flame (Gwyn)"
+ },
+ {
+  "id": "1412950",
+  "desc": "Lost Izalith (Bed of Chaos)"
+ },
+ {
+  "id": "1412964",
+  "desc": "Lost Izalith (Bonfire #1)"
+ },
+ {
+  "id": "1412960",
+  "desc": "Lost Izalith (Bonfire #2)"
+ },
+ {
+  "id": "1602951",
+  "desc": "New Londo Ruins (Entrance)"
+ },
+ {
+  "id": "1600980",
+  "desc": "New Londo Ruins (Entrance, repeat)"
+ },
+ {
+  "id": "1602960",
+  "desc": "New Londo Ruins (Pre-Ingward)"
+ },
+ {
+  "id": "1812960",
+  "desc": "Northern Undead Asylum (Bonfire #1)"
+ },
+ {
+  "id": "1812961",
+  "desc": "Northern Undead Asylum (Bonfire #2)"
+ },
+ {
+  "id": "1812100",
+  "desc": "Northern Undead Asylum (Cell)"
+ },
+ {
+  "id": "1812900",
+  "desc": "Northern Undead Asylum (Cell, Repeat)"
+ },
+ {
+  "id": "1212961",
+  "desc": "Oolacile Sanctuary (Bonfire)"
+ },
+ {
+  "id": "1212962",
+  "desc": "Oolacile Township (Bonfire)"
+ },
+ {
+  "id": "1212964",
+  "desc": "Oolacile Township Dungeon (Bonfire)"
+ },
+ {
+  "id": "1102960",
+  "desc": "Painted World of Ariamis (Bonfire)"
+ },
+ {
+  "id": "1102961",
+  "desc": "Painted World of Ariamis (Entrance)"
+ },
+ {
+  "id": "1102511",
+  "desc": "Painted World of Ariamis (Rope Bridge)"
+ },
+ {
+  "id": "1402960",
+  "desc": "Quelaag's Domain (Bonfire)"
+ },
+ {
+  "id": "1212963",
+  "desc": "Sanctuary Garden (Bonfire)"
+ },
+ {
+  "id": "1502961",
+  "desc": "Sen's Fortress (Bonfire)"
+ },
+ {
+  "id": "1502960",
+  "desc": "Sen's Fortress (Bridge, #1)"
+ },
+ {
+  "id": "1502962",
+  "desc": "Sen's Fortress (Bridge, #2)"
+ },
+ {
+  "id": "1302960",
+  "desc": "The Catacombs (Bonfire #1)"
+ },
+ {
+  "id": "1302961",
+  "desc": "The Catacombs (Bonfire #2)"
+ },
+ {
+  "id": "1302962",
+  "desc": "The Catacombs (Entrance)"
+ },
+ {
+  "id": "1312950",
+  "desc": "The Catacombs (Nito)"
+ },
+ {
+  "id": "1702960",
+  "desc": "The Duke's Archives (Balcony Bonfire)"
+ },
+ {
+  "id": "1702961",
+  "desc": "The Duke's Archives (Cell Bonfire)"
+ },
+ {
+  "id": "1702900",
+  "desc": "The Duke's Archives (Cell, After Seath)"
+ },
+ {
+  "id": "1702962",
+  "desc": "The Duke's Archives (Elevator Bonfire)"
+ },
+ {
+  "id": "1312960",
+  "desc": "Tomb of the Giants (Bonfire #1)"
+ },
+ {
+  "id": "1312961",
+  "desc": "Tomb of the Giants (Bonfire #2)"
+ },
+ {
+  "id": "1312962",
+  "desc": "Tomb of the Giants (Entrance)"
+ },
+ {
+  "id": "1012962",
+  "desc": "Undead Burg (Bonfire)"
+ },
+ {
+  "id": "1012960",
+  "desc": "Undead Burg (Pre-Dragon Scare)"
+ },
+ {
+  "id": "1012964",
+  "desc": "Undead Parish (Bonfire)"
+ },
+ {
+  "id": "1012965",
+  "desc": "Undead Parish (Near Boar)"
+ },
+ {
+  "id": "1012966",
+  "desc": "Undead Parish (Near Cell)"
+ },
+ {
+  "id": "1012961",
+  "desc": "Undead Parish (Sunlight Altar Bonfire)"
+ }
+]

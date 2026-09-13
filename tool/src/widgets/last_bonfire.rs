@@ -2,6 +2,8 @@ use libdsr::funcs::BonfireWarp;
 use libdsr::memedit::PointerChain;
 use practice_tool_core::widgets::{scaling_factor, Widget, BUTTON_HEIGHT, BUTTON_WIDTH};
 
+use crate::widgets::id_list::IdList;
+
 /// Set the bonfire you last rested at, and travel to it.
 ///
 /// IDs are the game's own bonfire IDs, e.g. `1022960` for Firelink Shrine and
@@ -10,13 +12,20 @@ use practice_tool_core::widgets::{scaling_factor, Widget, BUTTON_HEIGHT, BUTTON_
 struct LastBonfire {
     ptr: PointerChain<u32>,
     warp: BonfireWarp,
+    known: IdList,
     id_input: String,
     status: String,
 }
 
 impl LastBonfire {
     fn new(ptr: PointerChain<u32>, warp: BonfireWarp) -> Self {
-        Self { ptr, warp, id_input: String::new(), status: String::new() }
+        Self {
+            ptr,
+            warp,
+            known: IdList::new("bonfires", include_str!("bonfire_ids.json")),
+            id_input: String::new(),
+            status: String::new(),
+        }
     }
 }
 
@@ -26,6 +35,11 @@ impl Widget for LastBonfire {
         let button_width = BUTTON_WIDTH * scale;
 
         let current = self.ptr.read();
+
+        if let Some(id) = self.known.render(ui, button_width, 120.) {
+            self.id_input = id.to_string();
+            self.status = format!("{id} selected, not set yet");
+        }
 
         ui.set_next_item_width(button_width);
         ui.input_text("##last_bonfire_id", &mut self.id_input).hint("bonfire ID").build();
