@@ -7,10 +7,11 @@ It injects a DLL into the running game, hooks the DirectX 11 present chain, and 
 warp to saved coordinates, edit your character's stats, change game speed, and read out IGT and
 position live — the things you actually need when you are grinding a route or drilling a boss.
 
-> **Status: works, on patch 1.03.1.** Every feature in the table below has been used against a
-> running game, not just compiled — including the two that call into the game's own code. On any
-> other patch the tool now says so and disables every write rather than acting on addresses that
-> mean nothing there.
+> **Status: released, and working on patch 1.03.1.** Every feature in the table below has been used
+> against a running game, not just compiled — including the two that call into the game's own code.
+> On any other patch the tool says so and disables every write rather than acting on addresses that
+> mean nothing there. Downloads are on the
+> [releases page](https://github.com/fruizt/Dark_Souls_Remastered_Practice_Tool/releases/latest).
 
 ![The overlay open in-game, showing the full widget list](docs/overlay.png)
 
@@ -64,29 +65,28 @@ Everything in this table is implemented and works in-game.
 | --- | --- |
 | **No Death** | Survive at 0 HP. The core practice flag. |
 | **All No Damage** | Take no damage at all. |
-| **Quitout** | Quit to the main menu on a hotkey, without the pause screen. |
-| **Deathcam** | Free the camera from the player. |
-| **Event flags** | Read and flip story flags by ID — mark a boss dead, a door open, a covenant joined. |
-| **Warp menu** | Pick any of 67 bonfires by name and travel there, through the game's own travel routine. No Lordvessel, no bonfire to rest at. |
-| **Item spawner** | Search 866 items by name, pick an infusion and upgrade level, and put them in your inventory. |
-| **World debug flags** | Toggle no-dead, no-hit, no-attack, no-move, AI disable and the consumption flags for every character in the world, or for the player alone. |
-| **Render flags** | Turn drawing of the map, objects, characters, SFX and cutscenes on and off. |
 | **Infinite Stamina** | Stamina never drains. |
 | **Infinite Consumables** | Estus, throwables, and other consumables are not spent. |
 | **No Gravity** | Float — lets you get to geometry you could not otherwise reach. |
 | **No Collision** | Walk through walls and terrain. Pair with No Gravity to fly. |
+| **World debug flags** | Toggle no-dead, no-hit, no-attack, no-move, AI disable and the consumption flags for every character in the world, or for the player alone. |
+| **Deathcam** | Free the camera from the player. |
+| **Render flags** | Turn drawing of the map, objects, characters, SFX and cutscenes on and off. |
+| **Quitout** | Quit to the main menu on a hotkey, without the pause screen. |
+| **Warp menu** | Pick any of 67 bonfires by name and travel there, through the game's own travel routine. No Lordvessel, no bonfire to rest at. |
 | **Save / load position** | Store up to 3 position + camera-angle slots and warp back to any of them instantly. |
 | **Nudge position** | Move the player up or down by a fixed step, for un-sticking yourself out of floors. |
+| **Item spawner** | Search 866 items by name, pick an infusion and upgrade level, and put them in your inventory. |
+| **Event flags** | Read and flip story flags, by name for the boss kills or by ID for anything else — mark a boss dead, a door open, a covenant joined. |
 | **Character stats editor** | Live-edit level, souls, and all ten stats (vitality through humanity). |
 | **Add souls** | Grant a configurable soul amount on a hotkey. |
 | **Cycle game speed** | Step through a configured list of speed multipliers (0.5x / 1x / 2x / 5x …). |
 | **Savefile manager** | Browse and hot-load `DRAKS0005.sl2` savefiles without leaving the game. |
-| **Bonfire warp menu flag** | Force the bonfire travel menu open. |
-| **Live indicators** | Game version, IGT (in-game time, to the centisecond), player position, player velocity, frame counter, and ImGui debug readouts — each toggleable at runtime. |
+| **Live indicators** | Game version, IGT (in-game time, to the centisecond), player position, player velocity, FPS, current animation, frame counter, and ImGui debug readouts — each toggleable at runtime. |
+| **Version guard** | Detects the game build from its PE headers. On anything the addresses were not generated for, the overlay says so and every write is switched off. |
 | **Grouped & labelled widgets** | Organise the overlay into collapsible groups from the config file. |
 | **In-game log** | Widget actions print to a transient on-screen log, and to a rotating log file. |
 | **Clean eject** | Unhook and unload the DLL from inside the overlay without restarting the game. |
-| **Version guard** | Detects the game build from its PE headers. On anything the addresses were not generated for, the overlay says so and every write is switched off. |
 
 ---
 
@@ -95,8 +95,9 @@ Everything in this table is implemented and works in-game.
 > Windows x64 only. Dark Souls: Remastered is a Windows DX11 title and the tool is built directly
 > against the Win32 API.
 
-1. Grab the latest release archive and extract it **anywhere** — the three files just need to stay
-   side by side:
+1. Download the archive from the
+   [latest release](https://github.com/fruizt/Dark_Souls_Remastered_Practice_Tool/releases/latest)
+   and extract it **anywhere** — the three files just need to stay side by side:
 
    ```
    dark_souls_remastered_tool.exe          <- the injector you run
@@ -264,9 +265,10 @@ likely to break on another patch.
   functions directly. Currently crashes the game; the AOB signatures need revisiting.
 - **Target lock info**, **one shot**, **event disable** — real gaps against the DS3 tool, each
   needing its own reverse engineering.
-- **Multi-version support** — see version detection above. Deferred deliberately: no leaderboard
-  rule pins a patch and the community's own tools target current retail, so this is worth
-  confirming with runners before building for five builds.
+- **Multi-version support** — the tool detects the build it is attached to and refuses to write on
+  anything but 1.03.1, but addresses exist for that one build only. Deferred deliberately: no
+  leaderboard rule pins a patch and the community's own tools target current retail, so this is
+  worth confirming with runners before generating addresses for five builds.
 - **Item and flag data from the game's own params** — the bundled lists come from DSR-Gadget's
   resources. Reading `EquipParam*` and the message files directly would be correct for any patch
   and regenerable, but it is a sub-project of its own.
