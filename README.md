@@ -68,7 +68,7 @@ Everything in this table is implemented and works in-game.
 | **Deathcam** | Free the camera from the player. |
 | **Event flags** | Read and flip story flags by ID — mark a boss dead, a door open, a covenant joined. |
 | **Bonfire warp** | Set a bonfire ID and travel there, through the game's own travel routine. |
-| **Item spawner** | Search 1100+ items by name and put any of them in your inventory. |
+| **Item spawner** | Search 866 items by name, pick an infusion and upgrade level, and put them in your inventory. |
 | **World debug flags** | Toggle no-dead, no-hit, no-attack, no-move, AI disable and the consumption flags for every character in the world, or for the player alone. |
 | **Render flags** | Turn drawing of the map, objects, characters, SFX and cutscenes on and off. |
 | **Infinite Stamina** | Stamina never drains. |
@@ -186,7 +186,7 @@ widget is click-only.
 | `cycle_speed` | `{ cycle_speed = [0.5, 1.0, 2.0], hotkey = "8" }` | Cycles in ascending order, wrapping around. |
 | `souls` | `{ souls = 10000, hotkey = "9" }` | Adds to the current total rather than replacing it. |
 | `quitout` | `{ quitout = "p" }` | Quit to the main menu. Writes the game's own menu-kick field, so the save is written normally. |
-| `item_spawner` | `{ item_spawner = "ctrl+u" }` | Searchable item list. The hotkey spawns the selected item; the button opens the panel. |
+| `item_spawner` | `{ item_spawner = "ctrl+u" }` | Searchable item list with infusion, upgrade level and quantity. The hotkey spawns the selected item; the button opens the panel. |
 | `event_flags` | `{ event_flags = true }` | Panel to read, set and clear a story flag by its event ID. |
 | `last_bonfire` | `{ last_bonfire = true }` | Panel to read and set your last bonfire, and warp to it. |
 | `character_stats` | `{ character_stats = true }` | Opens the stat editor panel. Can take a hotkey instead of `true`. |
