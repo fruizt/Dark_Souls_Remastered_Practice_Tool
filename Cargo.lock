@@ -221,7 +221,7 @@ dependencies = [
 
 [[package]]
 name = "dark_souls_remastered_tool"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "hudhook",
  "imgui",
@@ -418,7 +418,7 @@ checksum = "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"
 
 [[package]]
 name = "libdsr"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "log",
  "once_cell",
@@ -1297,7 +1297,7 @@ checksum = "589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec"
 
 [[package]]
 name = "xtask"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "dotenv",
