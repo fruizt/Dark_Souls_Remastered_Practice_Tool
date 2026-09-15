@@ -90,10 +90,10 @@ crash the game or corrupt a save, so when a change is speculative, say so plainl
 
 Worth knowing before you go looking for bugs in them — these are incomplete by design, not broken:
 
-- `libdsr::version::get_version()` hardcodes `Version::V1_03_1` instead of reading the PE version.
-  Multi-version support is unfinished; the scanner already handles it, the runtime lookup does not.
-- `Settings::show_console` is parsed and never read — the console is always allocated.
-- The `fps` and `animation` indicators parse but hit the `_ => {}` arm in `tool.rs` and draw nothing.
+- **Addresses exist for patch 1.03.1 only.** Detection itself is done: `version.rs` reads the running
+  module's PE `SizeOfImage`, resolves it to a `Version`, and switches every write off on a build it
+  does not recognise. So this is a guard that works, not a gap — but generating address sets for
+  other patches is still unfinished.
 - `widgets/warp_menu.rs` exists but is not wired into `config.rs`, and is not functional. The
   `wrap_menu` *flag* (a typo for warp, kept for config compatibility) does work.
 - `widgets/open_menu.rs` calls game menu functions directly and crashes the game — the AOB signatures
