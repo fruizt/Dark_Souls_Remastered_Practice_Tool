@@ -425,6 +425,15 @@ addresses, which do not.
 
 ## Troubleshooting
 
+**Your antivirus flags the injector** — Windows Defender detects `dark_souls_remastered_tool.exe` as
+`Trojan:Win32/Wacatac.B!ml`. It is a false positive, reported to Microsoft on 15 September 2026. The
+injector loads the overlay into the game with `OpenProcess`, `VirtualAllocEx`, `WriteProcessMemory`
+and `CreateRemoteThread` — the standard DLL injection sequence, which is also what a great deal of
+malware does, and a machine-learning heuristic cannot tell the two apart. The whole of it is about
+sixty lines in [`tool/src/inject.rs`](tool/src/inject.rs); read it before you trust it. The overlay
+DLL has never been flagged — only the injector. A DLL-only install that needs no injector at all is
+planned.
+
 **"Could not find process"** — the game is not running, or it started after you clicked the
 injector. Load into a save first, then inject.
 

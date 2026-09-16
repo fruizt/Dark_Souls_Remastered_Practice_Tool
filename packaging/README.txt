@@ -40,6 +40,20 @@ indicator and disables every write, rather than acting on addresses that mean
 nothing there.
 
 
+ANTIVIRUS
+----------------------------------------------------------------------------
+
+Windows Defender may flag `dark_souls_remastered_tool.exe` as
+Trojan:Win32/Wacatac.B!ml. This is a false positive and has been reported to
+Microsoft.
+
+The injector loads the overlay into the game using the standard Windows DLL
+injection calls. A lot of malware does the same thing, and the heuristic that
+looks at this cannot tell them apart. The code is about sixty lines, in
+tool/src/inject.rs in the repository, and you are welcome to read it before you
+trust it. The overlay DLL itself is not flagged - only the injector.
+
+
 CONFIGURATION
 ----------------------------------------------------------------------------
 
