@@ -13,6 +13,15 @@ position live — the things you actually need when you are grinding a route or 
 > mean nothing there. Downloads are on the
 > [releases page](https://github.com/fruizt/Dark_Souls_Remastered_Practice_Tool/releases/latest).
 
+> ### ⚠️ Windows Defender flags the injector
+>
+> `dark_souls_remastered_tool.exe` is detected as `Trojan:Win32/Wacatac.B!ml` and may be deleted on
+> download. It is a false positive — a machine-learning call on the DLL injection the tool does to
+> load its overlay, which is what every practice tool does and also what a lot of malware does.
+> Reported to Microsoft on 15 September 2026. The injector is about sixty lines you can read in
+> [`tool/src/inject.rs`](tool/src/inject.rs), and the overlay DLL itself is not flagged. See
+> [the troubleshooting entry](#troubleshooting) for the whole story.
+
 ![The overlay open in-game, showing the full widget list](docs/overlay.png)
 
 <p align="center">
